@@ -205,3 +205,59 @@ class BaseInference(ABC):
         """
         pass
 ```
+
+## Future: API Version Management
+
+When v2 API is needed, consider the following structure options:
+
+### Option A: Directory-based separation
+
+```
+src/app/presentation/
+├── api/
+│   ├── v1/
+│   │   ├── __init__.py          # v1_router assembly
+│   │   ├── patient_router.py    # prefix="/patients"
+│   │   ├── vital_router.py      # prefix="/vitals"
+│   │   └── inference_router.py  # prefix="/inference"
+│   └── v2/
+│       ├── __init__.py          # v2_router assembly
+│       └── ...
+└── schemas/                      # Shared (version-agnostic)
+```
+
+```python
+# main.py
+from app.presentation.api.v1 import v1_router
+from app.presentation.api.v2 import v2_router
+
+app.include_router(v1_router, prefix="/api/v1")
+app.include_router(v2_router, prefix="/api/v2")
+```
+
+**Pros:** Clear separation, v1/v2 independent development
+**Cons:** File relocation required, deeper directory nesting
+
+### Option B: Central router assembly
+
+```
+src/app/presentation/
+├── v1.py                        # v1_router assembly
+├── v2.py                        # v2_router assembly
+├── routers/
+│   ├── patient_router.py        # prefix="/patients"
+│   ├── vital_router.py
+│   └── inference_router.py
+└── schemas/
+```
+
+```python
+# v1.py
+v1_router = APIRouter()
+v1_router.include_router(patient_router)
+v1_router.include_router(vital_router)
+v1_router.include_router(inference_router)
+```
+
+**Pros:** Minimal file changes, routers can be reused across versions
+**Cons:** Less clear separation between versions

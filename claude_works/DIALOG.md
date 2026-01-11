@@ -806,3 +806,159 @@ Added "Adding New Inference Strategy" section with:
 - Step 3: Use the new strategy via InferenceService
 
 **Status:** Phase 3C completed
+
+---
+
+# Phase 3 Post-Merge: Refactoring
+
+## session_3_merge_1
+
+**Date: 2026-01-11**
+
+### Merge Conflict Resolution
+
+**Context:**
+Phase 3A, 3B, 3C branches merged to main. Conflicts in documentation files.
+
+**Conflict Files:**
+| File | Resolution |
+|------|------------|
+| `claude_works/DIALOG.md` | Keep 3A, 3B content + add 3C |
+| `claude_works/vital_monitor/GLOBAL.md` | Mark 3A, 3B, 3C all as Completed |
+
+**Analysis: Why main.py had no conflict:**
+- Phase 3C branched from `47f8782` (Phase 2: Superseded)
+- 3C added `inference_router` at different location (near `/health` endpoint)
+- 3A/3B changes were at top of file (imports, routers, handlers)
+- Git 3-way merge auto-resolved due to non-overlapping changes
+
+---
+
+## session_3_merge_2
+
+**Date: 2026-01-11**
+
+### XP-based Refactoring Analysis
+
+**Objective:**
+Analyze merged codebase for cleanup needs following XP principles.
+
+**Initial Analysis (Before XP Review):**
+
+| Issue | Priority |
+|-------|----------|
+| `schemas/__init__.py` incomplete exports | HIGH |
+| `application/__init__.py` incomplete exports | HIGH |
+| `main.py` scattered router registration | MEDIUM |
+| `vital_router.py` no prefix pattern | MEDIUM |
+
+**XP Principle Application:**
+
+| Principle | Decision |
+|-----------|----------|
+| **YAGNI** | `__init__.py` export 추가 불필요 (사용처 0건) |
+| **DRY** | `vital_router`에서 `/api/v1` 반복 제거 필요 |
+| **Simple Design** | `main.py` 코드 그룹화 필요 |
+
+**Final Refactoring Scope (XP Filtered):**
+
+| Task | Do? | Reason |
+|------|-----|--------|
+| `main.py` 정리 | YES | Simple Design |
+| `vital_router` prefix 적용 | YES | DRY |
+| `__init__.py` export 추가 | NO | YAGNI (사용처 0건) |
+
+---
+
+## session_3_merge_3
+
+**Date: 2026-01-11**
+
+### Refactoring Execution
+
+**Changes Made:**
+
+1. **main.py** - Code organization
+   - Grouped all router registrations together
+   - Grouped all exception handlers together
+   - Added section comments
+
+2. **vital_router.py** - Prefix pattern
+   - Changed: `APIRouter(tags=["vitals"])` → `APIRouter(prefix="/api/v1/vitals", tags=["vitals"])`
+   - Removed `/api/v1/vitals` from each route decorator
+   - Changed GET path: `/api/v1/patients/{patient_id}/vitals` → `/api/v1/vitals/patient/{patient_id}`
+
+3. **test_vital_api.py** - Updated GET endpoint paths
+
+4. **tests/e2e/conftest.py** - Deleted (was shadowing root conftest fixtures)
+
+**Issue Found & Fixed:**
+- `tests/e2e/conftest.py` (Phase 3C) was overriding `test_client` fixture
+- This caused vital/patient API tests to fail (404 errors)
+- Solution: Delete e2e conftest, use root conftest
+
+**Test Results:**
+```
+61 passed
+Coverage: 86.11%
+```
+
+---
+
+## session_3_merge_4
+
+**Date: 2026-01-11**
+
+### Conftest Structure Improvement
+
+**User Feedback:**
+`test_client` is only used in e2e tests, should be in `tests/e2e/conftest.py`.
+
+**Analysis:**
+
+| Fixture | Unit Tests | E2E Tests |
+|---------|------------|-----------|
+| `test_engine` | Indirect (via db_session) | Indirect |
+| `db_session` | Used (17 places) | Used |
+| `test_client` | Not used | Used |
+
+**Final Structure:**
+
+```
+tests/
+├── conftest.py          # test_engine, db_session (shared)
+└── e2e/
+    ├── conftest.py      # test_client (e2e only)
+    └── *.py
+```
+
+**Test Results:**
+```
+61 passed
+Coverage: 86.11%
+```
+
+---
+
+## session_3_merge_5
+
+**Date: 2026-01-11**
+
+### API Version Management Strategy
+
+**User Question:**
+How to structure for future v2 API? Concerns about file separation vs confusion.
+
+**Options Documented in README:**
+
+| Option | Structure | Pros | Cons |
+|--------|-----------|------|------|
+| **A** | `api/v1/`, `api/v2/` directories | Clear separation | File relocation needed |
+| **B** | `v1.py`, `v2.py` + shared `routers/` | Minimal changes, reusable routers | Less clear separation |
+
+**Decision:** Document both options in README for future reference (YAGNI - not implementing now)
+
+**README Updated:**
+Added "Future: API Version Management" section with Option A and B details.
+
+**Status:** Phase 3 post-merge refactoring completed
