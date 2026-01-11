@@ -18,7 +18,7 @@ class TestVerifyBearerToken:
         class MockCredentials:
             credentials = "test-token-123"
 
-        result = verify_bearer_token(MockCredentials())
+        result = verify_bearer_token(MockCredentials())  # ty: ignore[invalid-argument-type]
         assert result is True
 
     def test_invalid_token_raises_401(self, monkeypatch):
@@ -33,7 +33,7 @@ class TestVerifyBearerToken:
             credentials = "wrong-token"
 
         with pytest.raises(HTTPException) as exc_info:
-            verify_bearer_token(MockCredentials())
+            verify_bearer_token(MockCredentials())  # ty: ignore[invalid-argument-type]
 
         assert exc_info.value.status_code == 401
         assert exc_info.value.detail == "Invalid token"
@@ -51,6 +51,6 @@ class TestVerifyBearerToken:
             credentials = ""
 
         with pytest.raises(HTTPException) as exc_info:
-            verify_bearer_token(MockCredentials())
+            verify_bearer_token(MockCredentials())  # ty: ignore[invalid-argument-type]
 
         assert exc_info.value.status_code == 401

@@ -141,14 +141,14 @@ async def update_vital(
 
 ## Checklist
 
-- [ ] Vital schemas created (with vital_type in update)
-- [ ] VitalService created
-- [ ] Vital router created
-- [ ] Patient validation on vital create
-- [ ] Time range query implemented
-- [ ] Optional vital_type filter
-- [ ] Auth dependency applied to all routes
-- [ ] 409 Conflict on version mismatch
+- [x] Vital schemas created (with vital_type in update)
+- [x] VitalService created
+- [x] Vital router created
+- [x] Patient validation on vital create
+- [x] Time range query implemented
+- [x] Optional vital_type filter
+- [x] Auth dependency applied to all routes
+- [x] 409 Conflict on version mismatch
 
 ## Test Cases
 
