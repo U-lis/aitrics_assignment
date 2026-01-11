@@ -17,10 +17,13 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Routers
 app.include_router(patient_router)
 app.include_router(vital_router)
+app.include_router(inference_router)
 
 
+# Exception handlers
 @app.exception_handler(VitalNotFoundError)
 async def vital_not_found_handler(request: Request, exc: VitalNotFoundError) -> JSONResponse:
     return JSONResponse(status_code=404, content={"detail": str(exc)})
@@ -41,9 +44,7 @@ async def duplicate_patient_handler(request: Request, exc: DuplicatePatientIdErr
     return JSONResponse(status_code=409, content={"detail": str(exc)})
 
 
-app.include_router(inference_router)
-
-
+# Health check
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""

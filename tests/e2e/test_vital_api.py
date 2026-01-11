@@ -134,7 +134,7 @@ class TestGetVitals:
         await db_session.commit()
 
         response = await test_client.get(
-            f"/api/v1/patients/{patient_id}/vitals",
+            f"/api/v1/vitals/patient/{patient_id}",
             headers=AUTH_HEADERS,
             params={
                 "from": "2024-01-01T00:00:00Z",
@@ -162,7 +162,7 @@ class TestGetVitals:
         await db_session.commit()
 
         response = await test_client.get(
-            f"/api/v1/patients/{patient_id}/vitals",
+            f"/api/v1/vitals/patient/{patient_id}",
             headers=AUTH_HEADERS,
             params={
                 "from": "2024-01-01T09:00:00Z",
@@ -188,7 +188,7 @@ class TestGetVitals:
         await db_session.commit()
 
         response = await test_client.get(
-            f"/api/v1/patients/{patient_id}/vitals",
+            f"/api/v1/vitals/patient/{patient_id}",
             headers=AUTH_HEADERS,
             params={
                 "from": "2024-01-01T00:00:00Z",
@@ -208,7 +208,7 @@ class TestGetVitals:
         await db_session.commit()
 
         response = await test_client.get(
-            f"/api/v1/patients/{patient_id}/vitals",
+            f"/api/v1/vitals/patient/{patient_id}",
             headers=AUTH_HEADERS,
             params={
                 "from": "2024-01-01T00:00:00Z",
@@ -222,7 +222,7 @@ class TestGetVitals:
     @pytest.mark.asyncio
     async def test_get_vitals_unauthorized(self, test_client: AsyncClient):
         response = await test_client.get(
-            "/api/v1/patients/P001/vitals",
+            "/api/v1/vitals/patient/P001",
             params={
                 "from": "2024-01-01T00:00:00Z",
                 "to": "2024-01-01T23:59:59Z",

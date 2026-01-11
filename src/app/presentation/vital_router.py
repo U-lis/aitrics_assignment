@@ -15,10 +15,10 @@ from app.presentation.schemas.vital_schema import (
     VitalUpdateRequest,
 )
 
-router = APIRouter(tags=["vitals"])
+router = APIRouter(prefix="/api/v1/vitals", tags=["vitals"])
 
 
-@router.post("/api/v1/vitals", response_model=VitalResponse, status_code=201)
+@router.post("", response_model=VitalResponse, status_code=201)
 async def create_vital(
     request: VitalCreateRequest,
     _: bool = Depends(verify_bearer_token),
@@ -28,7 +28,7 @@ async def create_vital(
     return await service.create_vital(request)
 
 
-@router.get("/api/v1/patients/{patient_id}/vitals", response_model=VitalListResponse)
+@router.get("/patient/{patient_id}", response_model=VitalListResponse)
 async def get_vitals(
     patient_id: str,
     from_: datetime = Query(..., alias="from"),
@@ -41,7 +41,7 @@ async def get_vitals(
     return await service.get_vitals(patient_id, from_, to, vital_type)
 
 
-@router.put("/api/v1/vitals/{vital_id}", response_model=VitalResponse)
+@router.put("/{vital_id}", response_model=VitalResponse)
 async def update_vital(
     vital_id: UUID,
     request: VitalUpdateRequest,

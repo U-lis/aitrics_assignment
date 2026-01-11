@@ -56,6 +56,11 @@ aitrics 비대면 과제.
     }
     ```   
    
+## Modifications
+1. 2.2 Vital data API 의 api prefix 가 통일되지 않음. prefix를 통일하기 위해 Vital 데이터 조회 API 를 변경함.
+    - 원본 : `/api/v1/patients/{patient_id}/vitals`
+    - 수정 : `/api/v1/vitals/patient/{patient_id}`
+   
 # How to use
 
 ## Environment Setup
