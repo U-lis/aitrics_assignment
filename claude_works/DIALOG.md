@@ -626,3 +626,100 @@ Coverage: 72% (improved from 70% due to simpler database.py)
 **Key Learning:** The actual fix for pytest-asyncio event loop issues is the loop scope configuration, not lazy initialization of database engines.
 
 **Status:** Phase 3A finalized, GLOBAL.md updated to mark as Completed
+
+---
+
+# Phase 3B: Vital Data API
+
+## session_3b_1
+
+**Date: 2026-01-11**
+
+### Task Request
+
+User requested to read GLOBAL.md and PHASE_3B_VITAL_API.md, then implement Phase 3B (Vital Data API).
+
+### Codebase Exploration
+
+**Already Implemented (from previous phases):**
+| Component | Location | Status |
+|-----------|----------|--------|
+| VitalType enum | `domain/vital_type.py` | ✅ Ready |
+| Domain exceptions | `domain/exceptions.py` | ✅ Ready |
+| VitalModel | `infrastructure/models/vital_model.py` | ✅ Ready |
+| VitalRepository | `infrastructure/repositories/vital_repository.py` | ✅ Ready |
+| PatientRepository | `infrastructure/repositories/patient_repository.py` | ✅ Ready |
+| Auth dependency | `dependencies.py` | ✅ Ready |
+| Test fixtures | `tests/conftest.py` | ✅ Ready |
+
+**Needs Implementation:**
+- Vital schemas (presentation layer)
+- VitalService (application layer)
+- Vital router (presentation layer)
+- Exception handlers in main.py
+- E2E tests
+
+### Implementation
+
+**Files Created:**
+| File | Description |
+|------|-------------|
+| `src/app/presentation/__init__.py` | Package init |
+| `src/app/presentation/schemas/__init__.py` | Package init |
+| `src/app/presentation/schemas/vital_schema.py` | 5 Pydantic schemas |
+| `src/app/application/__init__.py` | Package init |
+| `src/app/application/vital_service.py` | VitalService class |
+| `src/app/presentation/vital_router.py` | 3 API endpoints |
+| `tests/e2e/__init__.py` | Package init |
+| `tests/e2e/test_vital_api.py` | 13 E2E tests |
+| `tests/unit/test_vital_service.py` | 7 unit tests |
+
+**Files Modified:**
+| File | Changes |
+|------|---------|
+| `src/app/main.py` | Added exception handlers + vital_router |
+
+### API Endpoints
+
+| Method | Path | Status Code | Description |
+|--------|------|-------------|-------------|
+| POST | `/api/v1/vitals` | 201 | Create vital |
+| GET | `/api/v1/patients/{patient_id}/vitals` | 200 | Query with time range/type filter |
+| PUT | `/api/v1/vitals/{vital_id}` | 200 | Update with optimistic lock |
+
+### Issues Encountered & Resolved
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Event loop conflict | Used `@pytest.mark.anyio` instead of `@pytest.mark.asyncio` | Changed to `@pytest.mark.asyncio` |
+| DB session isolation | Fixture data not visible to API | Used explicit commits and unique patient_ids |
+| Auth status code | Expected 403, got 401 | Corrected test to expect 401 |
+| Coverage 73% < 75% | Missing unit tests | Added 7 VitalService unit tests |
+
+### Test Results
+
+```
+32 passed
+Coverage: 79.42% (target: >= 75%)
+```
+
+### Checklist Updates
+
+Updated PHASE_3B_VITAL_API.md:
+```markdown
+- [x] Vital schemas created (with vital_type in update)
+- [x] VitalService created
+- [x] Vital router created
+- [x] Patient validation on vital create
+- [x] Time range query implemented
+- [x] Optional vital_type filter
+- [x] Auth dependency applied to all routes
+- [x] 409 Conflict on version mismatch
+```
+
+Updated GLOBAL.md Phase Overview:
+```
+| 3B | Vital Data API | 2.5 | **Completed** |
+```
+
+**Status:** Phase 3B completed successfully

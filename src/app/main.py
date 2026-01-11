@@ -5,8 +5,10 @@ from app.domain.exceptions import (
     DuplicatePatientIdError,
     OptimisticLockError,
     PatientNotFoundError,
+    VitalNotFoundError,
 )
 from app.presentation.patient_router import router as patient_router
+from app.presentation.vital_router import router as vital_router
 
 app = FastAPI(
     title="Vital Monitor API",
@@ -15,20 +17,26 @@ app = FastAPI(
 )
 
 app.include_router(patient_router)
+app.include_router(vital_router)
+
+
+@app.exception_handler(VitalNotFoundError)
+async def vital_not_found_handler(request: Request, exc: VitalNotFoundError) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
 
 
 @app.exception_handler(PatientNotFoundError)
-async def patient_not_found_handler(request: Request, exc: PatientNotFoundError):
+async def patient_not_found_handler(request: Request, exc: PatientNotFoundError) -> JSONResponse:
     return JSONResponse(status_code=404, content={"detail": str(exc)})
 
 
 @app.exception_handler(OptimisticLockError)
-async def optimistic_lock_handler(request: Request, exc: OptimisticLockError):
+async def optimistic_lock_handler(request: Request, exc: OptimisticLockError) -> JSONResponse:
     return JSONResponse(status_code=409, content={"detail": str(exc)})
 
 
 @app.exception_handler(DuplicatePatientIdError)
-async def duplicate_patient_handler(request: Request, exc: DuplicatePatientIdError):
+async def duplicate_patient_handler(request: Request, exc: DuplicatePatientIdError) -> JSONResponse:
     return JSONResponse(status_code=409, content={"detail": str(exc)})
 
 

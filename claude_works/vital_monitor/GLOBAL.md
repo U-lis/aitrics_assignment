@@ -66,7 +66,7 @@ src/app/
 | 2 | Authentication (JWT) | 1 | ~~Superseded~~ |
 | 2.5 | Auth Migration (Bearer Token) | 2 | **Completed** |
 | 3A | Patient API | 2.5 | **Completed** |
-| 3B | Vital Data API | 2.5 | Pending |
+| 3B | Vital Data API | 2.5 | **Completed** |
 | 3C | Inference API | 2.5 | Pending |
 | 4 | Containerization | All | Pending |
 | 5 | CI Pipeline | 0.5 | Pending |
