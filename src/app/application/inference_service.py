@@ -9,12 +9,8 @@ class InferenceService:
         self.inference = InferenceFactory.get(strategy_name)
 
     def evaluate(self, request: InferenceRequest) -> InferenceResponse:
-        max_result = None
-
-        for record in request.records:
-            result = self.inference.evaluate(record.vitals)
-            if max_result is None or result.risk_score > max_result.risk_score:
-                max_result = result
+        results = [self.inference.evaluate(record.vitals) for record in request.records]
+        max_result = max(results, key=lambda r: r.risk_score)
 
         return InferenceResponse(
             patient_id=request.patient_id,

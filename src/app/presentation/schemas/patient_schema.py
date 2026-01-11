@@ -81,8 +81,6 @@ class PatientResponse(BaseModel):
     name: str = Field(..., description="Patient full name")
     gender: str = Field(..., description="Patient gender: 'M' or 'F'")
     birth_date: date = Field(..., description="Patient date of birth")
-    version: int = Field(
-        ..., description="Version number for optimistic locking"
-    )
+    version: int = Field(..., description="Version number for optimistic locking")
     created_at: datetime = Field(..., description="Record creation timestamp (UTC)")
     updated_at: datetime = Field(..., description="Last update timestamp (UTC)")

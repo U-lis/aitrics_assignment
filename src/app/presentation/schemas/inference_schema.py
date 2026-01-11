@@ -83,6 +83,4 @@ class InferenceResponse(BaseModel):
         ...,
         description="List of triggered risk rules (e.g., 'HR > 120', 'SBP < 90')",
     )
-    evaluated_at: datetime = Field(
-        ..., description="Timestamp of evaluation (UTC)"
-    )
+    evaluated_at: datetime = Field(..., description="Timestamp of evaluation (UTC)")

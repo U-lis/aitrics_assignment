@@ -74,14 +74,10 @@ class VitalResponse(BaseModel):
 
     id: UUID = Field(..., description="Internal unique identifier (UUID)")
     patient_id: str = Field(..., description="Hospital patient identifier")
-    recorded_at: datetime = Field(
-        ..., description="When the vital sign was recorded"
-    )
+    recorded_at: datetime = Field(..., description="When the vital sign was recorded")
     vital_type: str = Field(..., description="Type of vital sign")
     value: float = Field(..., description="Measured value")
-    version: int = Field(
-        ..., description="Version number for optimistic locking"
-    )
+    version: int = Field(..., description="Version number for optimistic locking")
     created_at: datetime = Field(..., description="Record creation timestamp (UTC)")
     updated_at: datetime = Field(..., description="Last update timestamp (UTC)")
 
@@ -124,6 +120,4 @@ class VitalListResponse(BaseModel):
         ...,
         description="Vital type filter applied (null if no filter)",
     )
-    items: list[VitalItem] = Field(
-        ..., description="List of vital measurements"
-    )
+    items: list[VitalItem] = Field(..., description="List of vital measurements")
