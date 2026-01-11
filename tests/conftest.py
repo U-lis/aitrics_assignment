@@ -1,9 +1,13 @@
+import os
 from collections.abc import AsyncGenerator
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+# Set test BEARER_TOKEN before importing settings
+os.environ.setdefault("BEARER_TOKEN", "test-bearer-token")
 
 from app.config import get_settings
 from app.infrastructure.database import get_db_session

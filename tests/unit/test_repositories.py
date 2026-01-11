@@ -4,40 +4,10 @@ from decimal import Decimal
 import pytest
 
 from app.domain.vital_type import VitalType
-from app.infrastructure.auth.password_handler import hash_password
-from app.infrastructure.models.doctor_model import DoctorModel
 from app.infrastructure.models.patient_model import PatientModel
 from app.infrastructure.models.vital_model import VitalModel
-from app.infrastructure.repositories.doctor_repository import DoctorRepository
 from app.infrastructure.repositories.patient_repository import PatientRepository
 from app.infrastructure.repositories.vital_repository import VitalRepository
-
-
-@pytest.mark.asyncio
-async def test_doctor_repo_find_by_id(db_session):
-    """Find Doctor by ID."""
-    doctor = DoctorModel(
-        id="repo_doc001",
-        password_hash=hash_password("password"),
-        name="Dr. Repo",
-    )
-    db_session.add(doctor)
-    await db_session.flush()
-
-    repo = DoctorRepository(db_session)
-    found = await repo.find_by_id("repo_doc001")
-
-    assert found is not None
-    assert found.name == "Dr. Repo"
-
-
-@pytest.mark.asyncio
-async def test_doctor_repo_find_by_id_not_found(db_session):
-    """Return None for missing ID."""
-    repo = DoctorRepository(db_session)
-    found = await repo.find_by_id("nonexistent_doctor")
-
-    assert found is None
 
 
 @pytest.mark.asyncio
