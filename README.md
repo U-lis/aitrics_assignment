@@ -108,3 +108,95 @@ uv sync --all-extras
 uv run pre-commit install
 uv run pre-commit install --hook-type pre-push
 ```
+
+## Adding New Inference Strategy
+
+The inference system uses the Strategy Pattern, making it easy to add new risk evaluation methods.
+
+### Step 1: Create a new strategy class
+
+Create a new file in `src/app/domain/inference/` that extends `BaseInference`:
+
+```python
+# src/app/domain/inference/ml_inference.py
+from app.domain.inference.base import BaseInference, InferenceResult
+from app.domain.risk_level import RiskLevel
+
+
+class MLInference(BaseInference):
+    def __init__(self):
+        # Load your ML model here
+        self.model = self._load_model()
+
+    def _load_model(self):
+        # Model loading logic
+        pass
+
+    def evaluate(self, vitals: dict[str, float]) -> InferenceResult:
+        # Your inference logic here
+        score = self.model.predict(vitals)
+
+        if score < 0.4:
+            level = RiskLevel.LOW
+        elif score < 0.8:
+            level = RiskLevel.MEDIUM
+        else:
+            level = RiskLevel.HIGH
+
+        return InferenceResult(
+            risk_score=score,
+            risk_level=level,
+            checked_rules=["ml_model_v1"],  # or relevant features
+        )
+```
+
+### Step 2: Register the strategy
+
+Option A: Register at module load (recommended for built-in strategies)
+
+```python
+# src/app/domain/inference/factory.py
+from app.domain.inference.ml_inference import MLInference
+
+class InferenceFactory:
+    _strategies: dict[str, type[BaseInference]] = {
+        "rule_based": RuleBasedInference,
+        "ml": MLInference,  # Add here
+    }
+```
+
+Option B: Register dynamically at runtime
+
+```python
+from app.domain.inference import InferenceFactory, MLInference
+
+InferenceFactory.register("ml", MLInference)
+```
+
+### Step 3: Use the new strategy
+
+```python
+from app.application.inference_service import InferenceService
+
+# Use the new strategy
+service = InferenceService(strategy_name="ml")
+response = service.evaluate(request)
+```
+
+### Strategy Interface
+
+All strategies must implement:
+
+```python
+class BaseInference(ABC):
+    @abstractmethod
+    def evaluate(self, vitals: dict[str, float]) -> InferenceResult:
+        """
+        Args:
+            vitals: Dictionary of vital signs (e.g., {"HR": 80.0, "SBP": 120.0})
+
+        Returns:
+            InferenceResult with risk_score (0.0-1.0), risk_level, and checked_rules
+        """
+        pass
+```
