@@ -17,7 +17,7 @@ Build a Hospital Vital Signs Monitoring REST API with:
 | Framework | FastAPI |
 | Database | PostgreSQL |
 | ORM | SQLAlchemy (async) |
-| Auth | JWT + argon2 (password) + AES-256 (token storage) |
+| Auth | Static Bearer Token (server-to-server) |
 | Migration | Alembic |
 | Package Manager | uv |
 | Testing | pytest + pytest-cov |
@@ -28,11 +28,10 @@ Build a Hospital Vital Signs Monitoring REST API with:
 src/app/
 ├── main.py
 ├── config.py
-├── dependencies.py
+├── dependencies.py          # Bearer token validation
 ├── domain/
 │   ├── patient.py
 │   ├── vital.py
-│   ├── doctor.py
 │   ├── vital_type.py
 │   ├── risk_level.py
 │   ├── exceptions.py
@@ -41,7 +40,6 @@ src/app/
 │       ├── rule_based_inference.py
 │       └── factory.py
 ├── application/
-│   ├── auth_service.py
 │   ├── patient_service.py
 │   ├── vital_service.py
 │   └── inference_service.py
@@ -49,17 +47,10 @@ src/app/
 │   ├── database.py
 │   ├── models/
 │   │   ├── base.py
-│   │   ├── doctor_model.py
 │   │   ├── patient_model.py
 │   │   └── vital_model.py
-│   ├── repositories/
-│   └── auth/
-│       ├── jwt_handler.py
-│       ├── password_handler.py
-│       └── token_encryption.py
+│   └── repositories/
 └── presentation/
-    ├── router.py
-    ├── auth_router.py
     ├── patient_router.py
     ├── vital_router.py
     ├── inference_router.py
@@ -72,10 +63,11 @@ src/app/
 |-------|------|--------------|--------|
 | 0.5 | Environment Setup | - | **Completed** |
 | 1 | Database Foundation | 0.5 | **Completed** |
-| 2 | Authentication | 1 | Pending |
-| 3A | Patient API | 2 | Pending |
-| 3B | Vital Data API | 2 | Pending |
-| 3C | Inference API | 2 | Pending |
+| 2 | Authentication (JWT) | 1 | **Completed** |
+| 2.5 | Auth Migration (Bearer Token) | 2 | Pending |
+| 3A | Patient API | 2.5 | Pending |
+| 3B | Vital Data API | 2.5 | Pending |
+| 3C | Inference API | 2.5 | Pending |
 | 4 | Containerization | All | Pending |
 | 5 | CI Pipeline | 0.5 | Pending |
 
@@ -101,11 +93,10 @@ if result is None:
     raise OptimisticLockError  # -> 409 Conflict
 ```
 
-### Token Expiration (Critical)
-| Concept | Duration | Purpose |
-|---------|----------|---------|
-| `access_token_expires_at` (DB) | 1 hour | Token reuse period |
-| JWT `exp` field | 3 min | JWT signature validation only |
+### Authentication (Post Phase 2.5)
+- Static Bearer token configured in `.env`
+- Simple token comparison (no JWT complexity)
+- Server-to-server communication model
 
 ### Error Handling
 - OptimisticLockError -> 409 Conflict

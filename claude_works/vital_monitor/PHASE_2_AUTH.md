@@ -174,14 +174,14 @@ async def get_current_doctor(
 
 ## Checklist
 
-- [ ] password_handler.py created (argon2)
-- [ ] token_encryption.py created (AES-256)
-- [ ] jwt_handler.py created
-- [ ] AuthService created with register/login/refresh
-- [ ] Auth schemas created
-- [ ] Auth router created
-- [ ] Auth dependency (get_current_doctor) created
-- [ ] 401 responses on auth failure
+- [x] password_handler.py created (argon2)
+- [x] token_encryption.py created (AES-256-GCM)
+- [x] jwt_handler.py created
+- [x] AuthService created with register/login/refresh
+- [x] Auth schemas created
+- [x] Auth router created
+- [x] Auth dependency (get_current_doctor) created
+- [x] 401 responses on auth failure
 
 ## Test Cases
 

@@ -1,11 +1,12 @@
 import base64
+import os
 
 from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
 
 from app.config import get_settings
 
-BLOCK_SIZE = 16
+NONCE_SIZE = 12  # GCM recommended nonce size
+TAG_SIZE = 16  # GCM auth tag size
 
 
 def get_aes_key() -> bytes:
@@ -17,21 +18,22 @@ def get_aes_key() -> bytes:
 
 
 def encrypt_token(token: str) -> str:
-    """Encrypt a token using AES-256-CBC."""
+    """Encrypt a token using AES-256-GCM."""
     key = get_aes_key()
-    cipher = AES.new(key, AES.MODE_CBC)
-    padded_data = pad(token.encode("utf-8"), BLOCK_SIZE)
-    encrypted = cipher.encrypt(padded_data)
-    result = base64.b64encode(bytes(cipher.iv) + encrypted).decode("utf-8")
+    nonce = os.urandom(NONCE_SIZE)
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    ciphertext, tag = cipher.encrypt_and_digest(token.encode("utf-8"))
+    result = base64.b64encode(nonce + tag + ciphertext).decode("utf-8")
     return result
 
 
 def decrypt_token(encrypted_token: str) -> str:
-    """Decrypt a token encrypted with AES-256-CBC."""
+    """Decrypt a token encrypted with AES-256-GCM."""
     key = get_aes_key()
     data = base64.b64decode(encrypted_token)
-    iv = data[:BLOCK_SIZE]
-    encrypted = data[BLOCK_SIZE:]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    decrypted = unpad(cipher.decrypt(encrypted), BLOCK_SIZE)
+    nonce = data[:NONCE_SIZE]
+    tag = data[NONCE_SIZE : NONCE_SIZE + TAG_SIZE]
+    ciphertext = data[NONCE_SIZE + TAG_SIZE :]
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    decrypted = cipher.decrypt_and_verify(ciphertext, tag)
     return decrypted.decode("utf-8")

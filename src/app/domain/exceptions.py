@@ -50,3 +50,9 @@ class DuplicatePatientIdError(DomainError):
     """Raised when patient_id already exists."""
 
     pass
+
+
+class DuplicateDoctorIdError(DomainError):
+    """Raised when doctor_id already exists."""
+
+    pass

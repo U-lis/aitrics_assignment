@@ -379,3 +379,115 @@ Add Phase 5 for GitHub Actions CI pipeline to validate code quality on push/PR.
 **Note:** Coverage 57% is expected - service layer and API endpoints not yet implemented.
 
 **Status:** Phase 1 completed, GLOBAL.md and PHASE_1_DATABASE.md updated
+
+---
+
+# Phase 2: Authentication (JWT)
+
+## session_2_1
+
+**Date: 2026-01-11**
+
+### Phase 2 Execution
+
+**Work Completed:**
+
+1. Updated token_encryption.py from AES-256-CBC to AES-256-GCM (user request)
+2. Updated jwt_handler.py with Phase 2 spec (iss/aud claims, tuple return)
+3. Created AuthService with register/login/refresh methods
+4. Created auth schemas (RegisterRequest/Response, LoginRequest/Response, RefreshRequest/Response)
+5. Created auth_router.py with /auth/register, /auth/login, /auth/refresh-token endpoints
+6. Created dependencies.py with get_current_doctor dependency
+7. Created main.py FastAPI application
+8. Wrote and executed 66 tests (all passed, 75.29% coverage)
+
+**Technical Decisions:**
+
+| Issue | Solution |
+|-------|----------|
+| AES encryption mode | AES-256-GCM (user explicitly requested instead of CBC) |
+| JWT exp microsecond precision | JWT library truncates to seconds, use `.replace(microsecond=0)` in tests |
+| HTTPBearer 401 vs 403 | HTTPBearer returns 401 for missing token, not 403 |
+| B008 ruff warning | Added `ignore = ["B008"]` for FastAPI Depends() pattern |
+| Import path without PYTHONPATH | Added `pythonpath = ["src"]` to pyproject.toml |
+
+**Status:** Phase 2 completed
+
+---
+
+# Phase 2.5: Auth Migration (JWT to Bearer Token)
+
+## session_2.5_1
+
+**Date: 2026-01-11**
+
+### Architecture Change Decision
+
+**Context Change:**
+Service environment changed to **Server-to-Server** communication. JWT-based authentication is no longer necessary. Simple Bearer token validation is sufficient for security.
+
+**User Requirements:**
+
+1. Delete doctor model and related APIs
+2. Remove JWT auth related `.env` settings and validation logic
+3. Add Bearer token matching validation logic
+
+### Clarification Questions & Answers
+
+**Q1: How will the Bearer token be managed?**
+- Options: `.env fixed token` / `System env var` / `Dynamic token exchange`
+- **Answer**: `.env fixed token` - Same token configured in both servers' .env files
+
+**Q2: How to handle doctors table in DB?**
+- Options: `Create DROP migration` / `Reset DB entirely`
+- **Answer**: `Create DROP migration` - Create new migration file to drop doctors table
+
+**Q3: Is `/me` endpoint (authenticated user info) needed?**
+- Options: `Delete` / `Keep (simplified)`
+- **Answer**: `Delete` - It was only for auth testing
+
+### Impact Analysis
+
+**Files to DELETE (15 files):**
+- `src/app/application/auth_service.py`
+- `src/app/presentation/auth_router.py`
+- `src/app/presentation/schemas/auth_schema.py`
+- `src/app/infrastructure/models/doctor_model.py`
+- `src/app/infrastructure/repositories/doctor_repository.py`
+- `src/app/infrastructure/auth/jwt_handler.py`
+- `src/app/infrastructure/auth/token_encryption.py`
+- `src/app/infrastructure/auth/password_handler.py`
+- `src/app/domain/doctor.py`
+- `tests/unit/test_auth_service.py`
+- `tests/unit/test_jwt_handler.py`
+- `tests/unit/test_token_encryption.py`
+- `tests/unit/test_password_handler.py`
+- `tests/e2e/test_auth_api.py`
+
+**Files to MODIFY:**
+- `src/app/config.py` - Remove JWT/AES settings, add `BEARER_TOKEN`
+- `src/app/main.py` - Remove auth_router, /me endpoint
+- `src/app/dependencies.py` - Simple token comparison instead of JWT validation
+- `src/app/domain/exceptions.py` - Remove Doctor-related exceptions
+- `src/app/infrastructure/models/__init__.py` - Remove DoctorModel export
+- `.env.example` - Update settings
+- `pyproject.toml` - Remove unused dependencies
+
+**Files to CREATE:**
+- `alembic/versions/xxx_drop_doctors_table.py` - Migration to drop doctors table
+- `tests/unit/test_bearer_auth.py` - New auth tests
+
+**Dependencies to REMOVE:**
+- `python-jose[cryptography]`
+- `argon2-cffi`
+- `pycryptodome`
+
+### New Authentication Flow
+
+```
+Request -> HTTPBearer extracts token -> Compare with settings.BEARER_TOKEN
+                                     -> Match: Continue to endpoint
+                                     -> No match: Raise 401 Unauthorized
+```
+
+**Status:** Phase 2.5 planning completed, pending execution
