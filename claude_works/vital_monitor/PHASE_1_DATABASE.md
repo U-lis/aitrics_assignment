@@ -139,6 +139,36 @@ uv run alembic upgrade head
 - [ ] Initial migration created and applied
 - [ ] Repository interfaces created
 
-## Test Cases (TBD)
+## Test Cases
 
-To be discussed with user.
+### Migration Tests (tests/unit/test_migrations.py)
+
+| Test | Description |
+|------|-------------|
+| test_migration_upgrade_head | alembic upgrade head succeeds |
+| test_migration_tables_exist | All tables created (doctors, patients, vitals) |
+
+### Model Tests (tests/unit/test_models.py)
+
+| Test | Description |
+|------|-------------|
+| test_doctor_model_create | Create and query Doctor |
+| test_doctor_model_set_tokens | set_tokens() stores encrypted tokens |
+| test_doctor_model_decrypted_properties | decrypted_access_token, decrypted_refresh_token work |
+| test_doctor_model_is_access_token_valid_true | Valid within expires_at |
+| test_doctor_model_is_access_token_valid_false | Invalid after expires_at |
+| test_patient_model_create | Create Patient (version=1) |
+| test_patient_model_auto_timestamps | created_at, updated_at auto-generated |
+| test_vital_model_create | Create Vital with FK |
+| test_vital_model_patient_fk_constraint | FK violation raises error |
+
+### Repository Tests (tests/unit/test_repositories.py)
+
+| Test | Description |
+|------|-------------|
+| test_doctor_repo_find_by_id | Find Doctor by ID |
+| test_doctor_repo_find_by_id_not_found | Return None for missing ID |
+| test_patient_repo_find_by_patient_id | Find Patient by patient_id |
+| test_patient_repo_exists | Check patient_id exists |
+| test_vital_repo_find_by_time_range | Query by time range |
+| test_vital_repo_find_by_time_range_with_type | Filter by vital_type |

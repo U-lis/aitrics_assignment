@@ -123,10 +123,68 @@ Token remains valid as long as refresh_token is valid.
 
 ---
 
-### Pending Discussion
+---
 
-**Test Cases:**
-- Test case details to be discussed in next session
-- Current plan files created without detailed test specifications
+## Session 2 - 2026-01-11
 
-**Status:** Plan files being created, awaiting test case discussion
+### Test Strategy Discussion
+
+**User Requirements:**
+1. Test coverage >= 75%
+2. DB tests: Create test DB, run `alembic upgrade head` at start, `alembic downgrade base` at end
+3. API e2e tests: Direct API calls preferred over mocking
+
+**Time-related Test Solutions (User Decision):**
+| Test Scenario | Solution |
+|---------------|----------|
+| JWT expiration (3min) | Create JWT with iat/exp = now - 5min |
+| access_token expiration (1h) | Set access_token_expires_at = now - 1hour in DB |
+
+**Phase 4 Testing:**
+- Manual verification only
+- Add README.md with usage documentation
+
+**Test DB:**
+- Name: `vital_monitor_test`
+
+---
+
+### Test Infrastructure Design
+
+**Test Fixtures (conftest.py):**
+- `setup_database` (session scope): alembic upgrade/downgrade
+- `db_session` (function scope): transaction rollback per test
+- `client`: FastAPI TestClient with DB override
+- `auth_client`: Pre-authenticated client
+
+**Test Directory Structure:**
+```
+tests/
+├── conftest.py
+├── unit/
+│   ├── test_password_handler.py
+│   ├── test_token_encryption.py
+│   ├── test_jwt_handler.py
+│   ├── test_rule_based_inference.py
+│   └── test_inference_factory.py
+└── e2e/
+    ├── test_auth_api.py
+    ├── test_patient_api.py
+    ├── test_vital_api.py
+    └── test_inference_api.py
+```
+
+---
+
+### Test Case Summary
+
+| Phase | Test Count | Type |
+|-------|------------|------|
+| 1 (Database) | 15 | Unit |
+| 2 (Auth) | 22 | Unit + E2E |
+| 3A (Patient) | 8 | E2E |
+| 3B (Vital) | 13 | E2E |
+| 3C (Inference) | 15 | Unit + E2E |
+| **Total** | **73** | |
+
+**Status:** Test cases finalized, phase md files being updated

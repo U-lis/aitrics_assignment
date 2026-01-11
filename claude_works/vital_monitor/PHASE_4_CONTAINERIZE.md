@@ -169,6 +169,14 @@ docker-compose down -v
 - [ ] API accessible at localhost:8080
 - [ ] Swagger UI accessible at localhost:8080/docs
 
-## Test Cases (TBD)
+## Testing
 
-To be discussed with user.
+**Manual verification only** - No automated tests for this phase.
+
+### Manual Verification Checklist
+
+- [ ] `docker-compose build` succeeds
+- [ ] Container logs show "Running database migrations..."
+- [ ] `curl http://localhost:8080/docs` returns HTML
+- [ ] Swagger UI renders correctly
+- [ ] Can register/login/use API through Swagger

@@ -112,9 +112,14 @@ if result is None:
 - InvalidTokenError -> 401 Unauthorized
 - SessionExpiredError -> 401 Unauthorized
 
-### Testing (TBD)
-- Test cases to be discussed and added to each phase file
+### Testing
 - Target coverage: >= 75%
+- Test DB: `vital_monitor_test`
+- Suite start: `alembic upgrade head`
+- Suite end: `alembic downgrade base`
+- Each test: transaction rollback for isolation
+- API tests: Direct HTTP calls via TestClient (no mocking)
+- Time-related tests: Use past timestamps (iat/exp = now - 5min) or DB manipulation (access_token_expires_at = now - 1hour)
 
 ## References
 

@@ -82,6 +82,83 @@ uv sync --dev
 - [ ] Basic directory structure created
 - [ ] uv sync successful
 
-## Test Cases (TBD)
+## Test Setup
 
-To be discussed with user.
+### Add to .env.example
+```
+TEST_DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/vital_monitor_test
+```
+
+### Create tests/conftest.py
+
+```python
+import pytest
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from fastapi.testclient import TestClient
+from alembic.config import Config
+from alembic import command
+
+TEST_DB_URL = "postgresql+asyncpg://user:pass@localhost:5432/vital_monitor_test"
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_database():
+    """Session-scoped: alembic upgrade/downgrade"""
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("sqlalchemy.url", TEST_DB_URL.replace("+asyncpg", ""))
+
+    # Upgrade at start
+    command.upgrade(alembic_cfg, "head")
+    yield
+    # Downgrade at end
+    command.downgrade(alembic_cfg, "base")
+
+@pytest.fixture
+async def db_session():
+    """Function-scoped: transaction rollback after each test"""
+    engine = create_async_engine(TEST_DB_URL)
+    async with engine.connect() as conn:
+        trans = await conn.begin()
+        session = AsyncSession(bind=conn)
+        yield session
+        await trans.rollback()
+    await engine.dispose()
+
+@pytest.fixture
+def client(db_session):
+    """FastAPI TestClient with DB override"""
+    from src.app.main import app
+    from src.app.dependencies import get_db_session
+
+    app.dependency_overrides[get_db_session] = lambda: db_session
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
+
+@pytest.fixture
+def auth_client(client):
+    """TestClient with valid auth token"""
+    client.post("/auth/register", json={
+        "id": "test_doctor",
+        "password": "test_password",
+        "name": "Test Doctor"
+    })
+    response = client.post("/auth/login", json={
+        "id": "test_doctor",
+        "password": "test_password"
+    })
+    token = response.json()["access_token"]
+    client.headers["Authorization"] = f"Bearer {token}"
+    return client
+```
+
+### Test Directory Structure
+
+```
+tests/
+├── __init__.py
+├── conftest.py
+├── unit/
+│   └── __init__.py
+└── e2e/
+    └── __init__.py
+```

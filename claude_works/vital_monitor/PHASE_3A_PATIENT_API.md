@@ -116,6 +116,17 @@ In `main.py`:
 - [ ] 409 Conflict on version mismatch
 - [ ] 404 Not Found on missing patient
 
-## Test Cases (TBD)
+## Test Cases
 
-To be discussed with user.
+### Patient API E2E (tests/e2e/test_patient_api.py)
+
+| Test | Description |
+|------|-------------|
+| test_create_patient_success | POST /api/v1/patients → 201 |
+| test_create_patient_duplicate | Duplicate patient_id → 409 |
+| test_create_patient_unauthorized | No token → 401 |
+| test_update_patient_success | PUT /api/v1/patients/{id} → 200 |
+| test_update_patient_version_increment | version increases after update |
+| test_update_patient_optimistic_lock_conflict | Same version twice → second gets 409 |
+| test_update_patient_not_found | Unknown patient_id → 404 |
+| test_update_patient_unauthorized | No token → 401 |

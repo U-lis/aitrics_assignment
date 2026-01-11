@@ -178,6 +178,42 @@ async def evaluate_vital_risk(
 - [ ] Auth dependency applied
 - [ ] Returns max risk_score among records
 
-## Test Cases (TBD)
+## Test Cases
 
-To be discussed with user.
+### RuleBasedInference Unit (tests/unit/test_rule_based_inference.py)
+
+| Test | Description |
+|------|-------------|
+| test_no_rules_matched | 0 matched → LOW (≤0.3) |
+| test_one_rule_hr | HR > 120 → MEDIUM |
+| test_one_rule_sbp | SBP < 90 → MEDIUM |
+| test_one_rule_spo2 | SpO2 < 90 → MEDIUM |
+| test_two_rules_matched | 2 matched → MEDIUM (0.4-0.7) |
+| test_three_rules_matched | 3 matched → HIGH (≥0.8) |
+| test_missing_hr_default | No HR → treated as 0 (no match) |
+| test_missing_sbp_default | No SBP → treated as inf (no match) |
+| test_missing_spo2_default | No SpO2 → treated as 100 (no match) |
+
+### InferenceFactory Unit (tests/unit/test_inference_factory.py)
+
+| Test | Description |
+|------|-------------|
+| test_get_default_strategy | "rule_based" returns RuleBasedInference |
+| test_get_unknown_strategy | Unknown name → ValueError |
+| test_register_new_strategy | Register and use custom strategy |
+
+### InferenceService Unit (tests/unit/test_inference_service.py)
+
+| Test | Description |
+|------|-------------|
+| test_evaluate_single_record | Single record evaluation |
+| test_evaluate_multiple_returns_max | Multiple records → max risk_score |
+| test_response_has_evaluated_at | Response includes evaluated_at |
+
+### Inference API E2E (tests/e2e/test_inference_api.py)
+
+| Test | Description |
+|------|-------------|
+| test_vital_risk_success | POST /api/v1/inference/vital-risk → 200 |
+| test_vital_risk_unauthorized | No token → 401 |
+| test_vital_risk_empty_records | Empty records → 422 |

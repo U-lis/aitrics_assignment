@@ -150,6 +150,22 @@ async def update_vital(
 - [ ] Auth dependency applied to all routes
 - [ ] 409 Conflict on version mismatch
 
-## Test Cases (TBD)
+## Test Cases
 
-To be discussed with user.
+### Vital API E2E (tests/e2e/test_vital_api.py)
+
+| Test | Description |
+|------|-------------|
+| test_create_vital_success | POST /api/v1/vitals → 201 |
+| test_create_vital_invalid_patient | Unknown patient_id → 404 |
+| test_create_vital_invalid_type | Invalid vital_type → 422 |
+| test_create_vital_unauthorized | No token → 401 |
+| test_get_vitals_success | GET /api/v1/patients/{id}/vitals → 200 |
+| test_get_vitals_time_range | from/to filter works |
+| test_get_vitals_type_filter | vital_type filter works |
+| test_get_vitals_empty | No data in range → empty array |
+| test_get_vitals_unauthorized | No token → 401 |
+| test_update_vital_success | PUT /api/v1/vitals/{id} → 200 |
+| test_update_vital_change_type | Can change vital_type |
+| test_update_vital_optimistic_lock_conflict | Version mismatch → 409 |
+| test_update_vital_not_found | Unknown vital_id → 404 |

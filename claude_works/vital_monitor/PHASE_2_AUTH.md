@@ -183,6 +183,50 @@ async def get_current_doctor(
 - [ ] Auth dependency (get_current_doctor) created
 - [ ] 401 responses on auth failure
 
-## Test Cases (TBD)
+## Test Cases
 
-To be discussed with user.
+### Password Handler (tests/unit/test_password_handler.py)
+
+| Test | Description |
+|------|-------------|
+| test_hash_password | Hash succeeds |
+| test_hash_password_different_each_time | Same password → different hashes (salt) |
+| test_verify_password_success | Correct password verifies |
+| test_verify_password_failure | Wrong password fails |
+
+### Token Encryption (tests/unit/test_token_encryption.py)
+
+| Test | Description |
+|------|-------------|
+| test_encrypt_token | Encryption succeeds |
+| test_decrypt_token | Decryption returns original |
+| test_encrypted_differs_from_original | Encrypted ≠ original |
+
+### JWT Handler (tests/unit/test_jwt_handler.py)
+
+| Test | Description |
+|------|-------------|
+| test_create_access_token | Returns (token, expires_at) |
+| test_create_access_token_exp_3min | JWT exp = now + 3min |
+| test_create_access_token_expires_at_1hour | expires_at = now + 1hour |
+| test_create_refresh_token | Creates refresh token |
+| test_verify_token_success | Valid token passes |
+| test_verify_token_expired | Create JWT with iat/exp = now - 5min → TokenExpiredError |
+| test_verify_token_future_iat | iat > now + 3min → InvalidTokenError |
+| test_verify_token_wrong_audience | aud ≠ "aitrics" → InvalidTokenError |
+| test_verify_token_mismatch_stored | Token ≠ DB stored → InvalidTokenError |
+
+### Auth API E2E (tests/e2e/test_auth_api.py)
+
+| Test | Description |
+|------|-------------|
+| test_register_success | POST /auth/register → 201 |
+| test_register_duplicate_id | Duplicate ID → 409 |
+| test_login_success | POST /auth/login → 200 with tokens |
+| test_login_invalid_id | Unknown ID → 401 |
+| test_login_wrong_password | Wrong password → 401 |
+| test_login_returns_existing_token | Valid session → same token returned |
+| test_refresh_success | POST /auth/refresh-token → 200 |
+| test_refresh_invalid_token | Invalid refresh_token → 401 |
+| test_refresh_within_1hour | Same expires_at, new JWT |
+| test_refresh_after_1hour | Set access_token_expires_at = now - 1hour → new expires_at |
