@@ -148,14 +148,14 @@ testpaths = ["tests"]
 
 ## Checklist
 
-- [ ] Dev dependencies verified/added to pyproject.toml
-- [ ] `.github/workflows/` directory created
-- [ ] `ci.yml` workflow file created
-- [ ] Tool configurations verified in pyproject.toml
-- [ ] Local verification: `uv run ruff check .`
-- [ ] Local verification: `uv run ruff format --check .`
-- [ ] Local verification: `uv run ty check src/`
-- [ ] Local verification: `uv run pytest`
+- [x] Dev dependencies verified/added to pyproject.toml
+- [x] `.github/workflows/` directory created
+- [x] `ci.yml` workflow file created
+- [x] Tool configurations verified in pyproject.toml
+- [x] Local verification: `uv run ruff check .`
+- [x] Local verification: `uv run ruff format --check .`
+- [x] Local verification: `uv run ty check src/`
+- [x] Local verification: `uv run pytest`
 - [ ] Push to GitHub and verify Actions run successfully
 
 ## Verification
