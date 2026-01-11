@@ -1,6 +1,14 @@
 # Phase 2: Authentication
 
-## Objective
+## Status: **SUPERSEDED**
+
+> **Note:** This phase was implemented but later replaced by Phase 2.5 (Auth Migration).
+> The JWT-based doctor authentication was removed in favor of Static Bearer Token for server-to-server communication.
+> See `PHASE_2.5_BEARER_AUTH.md` for current authentication implementation.
+
+---
+
+## Objective (Original)
 
 Implement doctor registration, login, and JWT token management.
 

@@ -63,7 +63,7 @@ src/app/
 |-------|------|--------------|--------|
 | 0.5 | Environment Setup | - | **Completed** |
 | 1 | Database Foundation | 0.5 | **Completed** |
-| 2 | Authentication (JWT) | 1 | **Completed** |
+| 2 | Authentication (JWT) | 1 | ~~Superseded~~ |
 | 2.5 | Auth Migration (Bearer Token) | 2 | **Completed** |
 | 3A | Patient API | 2.5 | Pending |
 | 3B | Vital Data API | 2.5 | Pending |
