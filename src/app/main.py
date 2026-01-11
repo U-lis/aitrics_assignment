@@ -7,6 +7,7 @@ from app.domain.exceptions import (
     PatientNotFoundError,
     VitalNotFoundError,
 )
+from app.presentation.inference_router import router as inference_router
 from app.presentation.patient_router import router as patient_router
 from app.presentation.vital_router import router as vital_router
 
@@ -38,6 +39,9 @@ async def optimistic_lock_handler(request: Request, exc: OptimisticLockError) ->
 @app.exception_handler(DuplicatePatientIdError)
 async def duplicate_patient_handler(request: Request, exc: DuplicatePatientIdError) -> JSONResponse:
     return JSONResponse(status_code=409, content={"detail": str(exc)})
+
+
+app.include_router(inference_router)
 
 
 @app.get("/health")

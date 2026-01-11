@@ -723,3 +723,86 @@ Updated GLOBAL.md Phase Overview:
 ```
 
 **Status:** Phase 3B completed successfully
+
+---
+
+# Phase 3C: Inference API
+
+## session_3c_1
+
+**Date: 2026-01-11**
+
+### Phase 3C Execution
+
+**Objective:**
+Implement rule-based vital risk scoring API with pluggable strategy pattern.
+
+**Work Completed:**
+
+1. Created inference domain layer (Strategy Pattern):
+   - `src/app/domain/inference/base.py` - BaseInference ABC + InferenceResult dataclass
+   - `src/app/domain/inference/rule_based_inference.py` - RuleBasedInference implementation
+   - `src/app/domain/inference/factory.py` - InferenceFactory for strategy selection
+   - `src/app/domain/inference/__init__.py` - Public exports
+
+2. Created application layer:
+   - `src/app/application/__init__.py`
+   - `src/app/application/inference_service.py` - InferenceService with multi-record handling
+
+3. Created presentation layer:
+   - `src/app/presentation/__init__.py`
+   - `src/app/presentation/schemas/__init__.py`
+   - `src/app/presentation/schemas/inference_schema.py` - VitalRecord, InferenceRequest, InferenceResponse
+   - `src/app/presentation/inference_router.py` - POST /api/v1/inference/vital-risk
+
+4. Updated `src/app/main.py` - Registered inference_router
+
+5. Created tests:
+   - `tests/unit/test_rule_based_inference.py` - 9 tests
+   - `tests/unit/test_inference_factory.py` - 3 tests
+   - `tests/unit/test_inference_service.py` - 3 tests
+   - `tests/e2e/test_inference_api.py` - 4 tests
+   - `tests/e2e/conftest.py` - E2E test fixture without DB dependency
+
+**Risk Scoring Logic:**
+
+| Matched Rules | Score | Level |
+|---------------|-------|-------|
+| 0 | 0.2 | LOW |
+| 1 | 0.5 | MEDIUM |
+| 2 | 0.7 | MEDIUM |
+| 3+ | 0.9 | HIGH |
+
+**Rules Implemented:**
+- HR > 120 → Risk increase
+- SBP < 90 → Risk increase
+- SpO2 < 90 → Risk increase
+
+**Multi-record Handling:**
+- Evaluate each record separately
+- Return highest risk_score among all evaluations
+
+**Test Results:**
+```
+19 passed in 0.04s
+```
+
+**Technical Decisions:**
+
+| Issue | Solution |
+|-------|----------|
+| E2E tests conflicting with DB conftest | Created separate `tests/e2e/conftest.py` with DB-independent fixture |
+| RiskLevel type consistency | Used `RiskLevel` enum from domain layer instead of string |
+| Missing vital defaults | HR→0, SBP→inf, SpO2→100 (safe defaults that don't trigger rules) |
+
+---
+
+### Documentation Update
+
+**README.md Updated:**
+Added "Adding New Inference Strategy" section with:
+- Step 1: Create new strategy class extending BaseInference
+- Step 2: Register strategy in InferenceFactory (static or dynamic)
+- Step 3: Use the new strategy via InferenceService
+
+**Status:** Phase 3C completed

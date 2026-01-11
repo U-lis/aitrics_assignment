@@ -168,15 +168,15 @@ async def evaluate_vital_risk(
 
 ## Checklist
 
-- [ ] BaseInference ABC created
-- [ ] InferenceResult dataclass created
-- [ ] RuleBasedInference implemented
-- [ ] InferenceFactory created
-- [ ] Inference schemas created
-- [ ] InferenceService with multi-record handling
-- [ ] Inference router created
-- [ ] Auth dependency applied
-- [ ] Returns max risk_score among records
+- [x] BaseInference ABC created
+- [x] InferenceResult dataclass created
+- [x] RuleBasedInference implemented
+- [x] InferenceFactory created
+- [x] Inference schemas created
+- [x] InferenceService with multi-record handling
+- [x] Inference router created
+- [x] Auth dependency applied
+- [x] Returns max risk_score among records
 
 ## Test Cases
 
