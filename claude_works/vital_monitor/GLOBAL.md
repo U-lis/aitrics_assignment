@@ -77,6 +77,7 @@ src/app/
 | 3B | Vital Data API | 2 | Pending |
 | 3C | Inference API | 2 | Pending |
 | 4 | Containerization | All | Pending |
+| 5 | CI Pipeline | 0.5 | Pending |
 
 ## Common Guidelines
 
