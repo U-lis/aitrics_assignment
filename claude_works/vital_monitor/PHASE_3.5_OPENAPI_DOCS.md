@@ -302,37 +302,94 @@ from_: datetime = Query(
 
 ---
 
+## Task 5: Fix 401 Response Examples
+
+### Problem
+`ErrorResponse` schema uses `examples=["Patient P00001234 not found"]` which appears in OpenAPI docs for ALL error responses including 401. This is incorrect - 401 should show authentication-related messages like "Invalid token".
+
+### Solution
+Override examples in each router's 401 response definition using FastAPI's `content` field.
+
+### Files to Modify
+
+**patient_router.py (2 places):**
+- POST /api/v1/patients - 401 response
+- PUT /api/v1/patients/{patient_id} - 401 response
+
+**vital_router.py (3 places):**
+- POST /api/v1/vitals - 401 response
+- GET /api/v1/vitals/patient/{patient_id} - 401 response
+- PUT /api/v1/vitals/{vital_id} - 401 response
+
+**inference_router.py (1 place):**
+- POST /api/v1/inference/vital-risk - 401 response
+
+### Implementation Pattern
+Change each 401 response to include both authentication error cases:
+```python
+401: {
+    "model": ErrorResponse,
+    "description": "Invalid or missing Bearer token",
+    "content": {
+        "application/json": {
+            "examples": {
+                "missing_token": {
+                    "summary": "No token provided",
+                    "value": {"detail": "Not authenticated"},
+                },
+                "invalid_token": {
+                    "summary": "Invalid token",
+                    "value": {"detail": "Invalid token"},
+                },
+            }
+        }
+    },
+},
+```
+
+**Note:** Two 401 cases exist:
+1. `"Not authenticated"` - HTTPBearer default when no token is provided
+2. `"Invalid token"` - Our code when token is wrong
+
+---
+
 ## Verification Checklist
 
 ### Task 1: Foundation
-- [ ] `error_schema.py` created with ErrorResponse model
-- [ ] `main.py` updated with `openapi_tags`
+- [x] `error_schema.py` created with ErrorResponse model
+- [x] `main.py` updated with `openapi_tags`
 
 ### Task 2: Patient
-- [ ] `PatientCreateRequest` fields have descriptions and examples
-- [ ] `PatientUpdateRequest` fields have descriptions and examples
-- [ ] `PatientResponse` has complete field docs with model example
-- [ ] `register_patient` endpoint has summary, description, responses (401, 409)
-- [ ] `update_patient` endpoint has summary, description, path param, responses (401, 404, 409)
+- [x] `PatientCreateRequest` fields have descriptions and examples
+- [x] `PatientUpdateRequest` fields have descriptions and examples
+- [x] `PatientResponse` has complete field docs with model example
+- [x] `register_patient` endpoint has summary, description, responses (401, 409)
+- [x] `update_patient` endpoint has summary, description, path param, responses (401, 404, 409)
 
 ### Task 3: Vital
-- [ ] `VitalCreateRequest` fields documented with units
-- [ ] `VitalUpdateRequest` fields documented
-- [ ] `VitalResponse`, `VitalItem`, `VitalListResponse` documented
-- [ ] `create_vital` endpoint documented with responses (401, 404)
-- [ ] `get_vitals` endpoint documented with path/query params, responses (401)
-- [ ] `update_vital` endpoint documented with path param, responses (401, 404, 409)
+- [x] `VitalCreateRequest` fields documented with units
+- [x] `VitalUpdateRequest` fields documented
+- [x] `VitalResponse`, `VitalItem`, `VitalListResponse` documented
+- [x] `create_vital` endpoint documented with responses (401, 404)
+- [x] `get_vitals` endpoint documented with path/query params, responses (401)
+- [x] `update_vital` endpoint documented with path param, responses (401, 404, 409)
 
 ### Task 4: Inference
-- [ ] `VitalRecord` fields documented
-- [ ] `InferenceRequest` fields documented
-- [ ] `InferenceResponse` fields documented with complete example
-- [ ] `evaluate_vital_risk` endpoint documented with risk rules, responses (401, 422)
+- [x] `VitalRecord` fields documented
+- [x] `InferenceRequest` fields documented
+- [x] `InferenceResponse` fields documented with complete example
+- [x] `evaluate_vital_risk` endpoint documented with risk rules, responses (401, 422)
+
+### Task 5: Fix 401 Response Examples
+- [x] `patient_router.py` 401 responses have correct example (2 places)
+- [x] `vital_router.py` 401 responses have correct example (3 places)
+- [x] `inference_router.py` 401 response has correct example (1 place)
 
 ### Final Verification
 - [ ] Start app: `uvicorn app.main:app --reload`
 - [ ] Swagger UI (`/docs`) shows all documentation
 - [ ] All endpoints show lock icon (security requirement)
 - [ ] Error responses visible per endpoint
+- [ ] 401 responses show "Invalid token" example (not "Patient P00001234 not found")
 - [ ] ReDoc (`/redoc`) renders properly
 - [ ] `openapi.json` contains security scheme and all descriptions

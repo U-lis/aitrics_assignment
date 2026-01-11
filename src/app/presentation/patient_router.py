@@ -24,6 +24,20 @@ router = APIRouter(prefix="/api/v1/patients", tags=["patients"])
         401: {
             "model": ErrorResponse,
             "description": "Invalid or missing Bearer token",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "missing_token": {
+                            "summary": "No token provided",
+                            "value": {"detail": "Not authenticated"},
+                        },
+                        "invalid_token": {
+                            "summary": "Invalid token",
+                            "value": {"detail": "Invalid token"},
+                        },
+                    }
+                }
+            },
         },
         409: {
             "model": ErrorResponse,
@@ -51,6 +65,20 @@ async def register_patient(
         401: {
             "model": ErrorResponse,
             "description": "Invalid or missing Bearer token",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "missing_token": {
+                            "summary": "No token provided",
+                            "value": {"detail": "Not authenticated"},
+                        },
+                        "invalid_token": {
+                            "summary": "Invalid token",
+                            "value": {"detail": "Invalid token"},
+                        },
+                    }
+                }
+            },
         },
         404: {
             "model": ErrorResponse,

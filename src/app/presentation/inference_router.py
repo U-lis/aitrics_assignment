@@ -33,6 +33,20 @@ When multiple records are provided, returns the highest risk assessment.
         401: {
             "model": ErrorResponse,
             "description": "Invalid or missing Bearer token",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "missing_token": {
+                            "summary": "No token provided",
+                            "value": {"detail": "Not authenticated"},
+                        },
+                        "invalid_token": {
+                            "summary": "Invalid token",
+                            "value": {"detail": "Invalid token"},
+                        },
+                    }
+                }
+            },
         },
         422: {
             "description": "Validation error (e.g., empty records list)",
