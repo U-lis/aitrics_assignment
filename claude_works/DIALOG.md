@@ -491,3 +491,138 @@ Request -> HTTPBearer extracts token -> Compare with settings.BEARER_TOKEN
 ```
 
 **Status:** Phase 2.5 planning completed, pending execution
+
+---
+
+# Phase 3A: Patient API
+
+## session_3A_1
+
+**Date: 2026-01-11**
+
+### Phase 3A Execution
+
+**Work Completed:**
+
+1. Created presentation schemas (`patient_schema.py`)
+   - `PatientCreateRequest`: patient_id, name, gender, birth_date
+   - `PatientUpdateRequest`: name, gender, birth_date, version
+   - `PatientResponse`: Full patient data with timestamps
+
+2. Created application service (`patient_service.py`)
+   - `create_patient()`: Duplicate check + create
+   - `update_patient()`: Optimistic lock with version check
+
+3. Created patient router (`patient_router.py`)
+   - `POST /api/v1/patients` → 201 Created
+   - `PUT /api/v1/patients/{patient_id}` → 200 OK
+
+4. Registered exception handlers in `main.py`
+   - `OptimisticLockError` → 409 Conflict
+   - `PatientNotFoundError` → 404 Not Found
+   - `DuplicatePatientIdError` → 409 Conflict
+
+5. Wrote E2E tests (`test_patient_api.py`) - 8 tests
+
+6. Added unit tests for optimistic locking (`test_repositories.py`) - 2 tests
+
+**Technical Issues & Solutions:**
+
+| Issue | Solution |
+|-------|----------|
+| pytest-asyncio event loop mismatch | Added `asyncio_default_test_loop_scope = "session"` to pyproject.toml |
+| database.py module-level engine creation | Refactored to lazy initialization pattern |
+| HTTPBearer returns 401 (not 403) for missing token | Fixed test expectations |
+
+**Configuration Changes:**
+
+| File | Change |
+|------|--------|
+| `pyproject.toml` | Added `asyncio_default_fixture_loop_scope = "session"`, `asyncio_default_test_loop_scope = "session"` |
+| `src/app/infrastructure/database.py` | Converted to lazy initialization (`_engine`, `_async_session_factory` globals) |
+| `tests/conftest.py` | Added `reset_database_globals` fixture, session-scoped `test_engine` |
+
+### Coverage Analysis
+
+**Final Results:**
+- 22 tests passed
+- Coverage: 70% (target: 75%)
+
+**Coverage Gap Reasons:**
+
+| File | Coverage | Reason |
+|------|----------|--------|
+| `domain/patient.py` | 0% | Dataclass not directly used (PatientModel used instead) |
+| `domain/vital.py` | 0% | Phase 3B - not yet implemented |
+| `domain/risk_level.py` | 0% | Phase 3C - not yet implemented |
+| `infrastructure/database.py` | 47% | Lazy init functions overridden in tests |
+| `repositories/vital_repository.py` | 50% | Phase 3B - not yet implemented |
+
+**Conclusion:** 75% coverage will be achieved after Phase 3B/3C completion. Current 70% is expected for Phase 3A scope.
+
+### Optimistic Lock Test Coverage
+
+| Layer | Test | Status |
+|-------|------|--------|
+| Unit | `test_patient_repo_update_with_version_success` | ✅ Added |
+| Unit | `test_patient_repo_update_with_version_conflict` | ✅ Added |
+| E2E | `test_update_patient_version_increment` | ✅ |
+| E2E | `test_update_patient_optimistic_lock_conflict` | ✅ |
+
+**Status:** Phase 3A completed, all checklist items verified
+
+---
+
+## session_3A_2
+
+**Date: 2026-01-11**
+
+### Code Review: database.py Changes
+
+**User Concern:**
+`database.py` changes (lazy initialization) are too extensive and may cause conflicts with other branches.
+
+**Analysis:**
+
+Original issue was pytest-asyncio event loop mismatch. Two changes were made:
+1. `pyproject.toml`: Added `asyncio_default_*_loop_scope = "session"`
+2. `database.py`: Converted to lazy initialization pattern
+
+**Question:** Was database.py change actually necessary?
+
+| Factor | Analysis |
+|--------|----------|
+| Test behavior | `get_db_session` is overridden in tests, so original engine is never used |
+| Root cause | Event loop mismatch fixed by pyproject.toml settings alone |
+| Branch impact | Lazy init adds complexity and potential merge conflicts |
+
+**Conclusion:** `database.py` change was unnecessary. The `pyproject.toml` settings alone fix the issue.
+
+### Revert Decision
+
+**User Decision:** Revert unnecessary changes.
+
+**Changes Reverted:**
+
+| File | Action |
+|------|--------|
+| `database.py` | Reverted to original (module-level engine creation) |
+| `conftest.py` | Removed `reset_database_globals` fixture |
+
+**Kept Changes:**
+
+| File | Setting |
+|------|---------|
+| `pyproject.toml` | `asyncio_default_fixture_loop_scope = "session"` |
+| `pyproject.toml` | `asyncio_default_test_loop_scope = "session"` |
+
+### Test Results After Revert
+
+```
+22 passed
+Coverage: 72% (improved from 70% due to simpler database.py)
+```
+
+**Key Learning:** The actual fix for pytest-asyncio event loop issues is the loop scope configuration, not lazy initialization of database engines.
+
+**Status:** Phase 3A finalized, GLOBAL.md updated to mark as Completed

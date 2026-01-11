@@ -108,13 +108,13 @@ In `main.py`:
 
 ## Checklist
 
-- [ ] Patient schemas created
-- [ ] PatientService with optimistic lock created
-- [ ] Patient router created
-- [ ] Auth dependency applied to all routes
-- [ ] Exception handlers registered
-- [ ] 409 Conflict on version mismatch
-- [ ] 404 Not Found on missing patient
+- [x] Patient schemas created
+- [x] PatientService with optimistic lock created
+- [x] Patient router created
+- [x] Auth dependency applied to all routes
+- [x] Exception handlers registered
+- [x] 409 Conflict on version mismatch
+- [x] 404 Not Found on missing patient
 
 ## Test Cases
 

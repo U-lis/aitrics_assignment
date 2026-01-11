@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import pytest
 
+from app.domain.exceptions import OptimisticLockError
 from app.domain.vital_type import VitalType
 from app.infrastructure.models.patient_model import PatientModel
 from app.infrastructure.models.vital_model import VitalModel
@@ -137,3 +138,60 @@ async def test_vital_repo_find_by_time_range_with_type(db_session):
     )
     assert len(results) == 1
     assert results[0].vital_type == VitalType.HR.value
+
+
+@pytest.mark.asyncio
+async def test_patient_repo_update_with_version_success(db_session):
+    """Optimistic lock update succeeds with correct version."""
+    patient = PatientModel(
+        patient_id="LOCK_P001",
+        name="Original Name",
+        gender="M",
+        birth_date=date(1990, 1, 1),
+    )
+    db_session.add(patient)
+    await db_session.flush()
+
+    repo = PatientRepository(db_session)
+    updated = await repo.update_with_version(
+        patient_id="LOCK_P001",
+        expected_version=1,
+        name="Updated Name",
+        gender="F",
+    )
+
+    assert updated.name == "Updated Name"
+    assert updated.gender == "F"
+    assert updated.version == 2
+
+
+@pytest.mark.asyncio
+async def test_patient_repo_update_with_version_conflict(db_session):
+    """Optimistic lock update fails with wrong version."""
+    patient = PatientModel(
+        patient_id="LOCK_P002",
+        name="Original",
+        gender="M",
+        birth_date=date(1990, 1, 1),
+    )
+    db_session.add(patient)
+    await db_session.flush()
+
+    repo = PatientRepository(db_session)
+
+    # First update succeeds (version 1 -> 2)
+    await repo.update_with_version(
+        patient_id="LOCK_P002",
+        expected_version=1,
+        name="First Update",
+    )
+
+    # Second update with stale version (1) should fail
+    with pytest.raises(OptimisticLockError) as exc_info:
+        await repo.update_with_version(
+            patient_id="LOCK_P002",
+            expected_version=1,  # Stale version
+            name="Second Update",
+        )
+
+    assert "Version mismatch" in str(exc_info.value)
