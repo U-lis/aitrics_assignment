@@ -63,52 +63,106 @@ aitrics 비대면 과제.
    
 # How to use
 
-## Environment Setup
+## Quick Start (Docker)
 
-1. Copy `.env.example` to `.env`:
+### 사전 요구사항
+- Docker
+- Docker Compose
+
+### 실행 방법
+
+```bash
+# 1. 환경변수 설정
+cp .env.example .env
+```
+
+`.env` 파일을 열어 `BEARER_TOKEN` 값을 설정합니다:
+```
+BEARER_TOKEN=my-secret-token-123
+```
+> 원하는 아무 문자열이나 사용 가능합니다. 이 값이 API 인증에 사용됩니다.
+
+```bash
+# 2. 서비스 시작 (DB + API 서버)
+docker-compose up --build
+```
+> PostgreSQL과 마이그레이션이 자동으로 설정됩니다. 별도의 DB 설치가 필요 없습니다.
+
+```bash
+# 3. 서비스 종료
+docker-compose down
+
+# 볼륨까지 삭제 (DB 초기화)
+docker-compose down -v
+```
+
+### API 테스트
+
+1. 브라우저에서 Swagger UI 접속: http://localhost:9090/docs
+2. 우측 상단 **Authorize** 버튼 클릭
+3. Value 입력란에 `.env`에 설정한 BEARER_TOKEN 값 입력 (예: `my-secret-token-123`)
+4. **Authorize** 클릭 후 API 테스트 진행
+
+## Local Development
+
+### 사전 요구사항
+- Python 3.13+
+- PostgreSQL 16+
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+
+### 1. PostgreSQL 설정
+
+```bash
+# PostgreSQL에 접속하여 데이터베이스 생성
+psql -U postgres
+
+# DB 생성 (psql 내에서)
+CREATE DATABASE vital_monitor;
+CREATE DATABASE vital_monitor_test;
+\q
+```
+
+### 2. 환경변수 설정
+
 ```bash
 cp .env.example .env
 ```
 
-2. Edit `.env` and set your values:
-
-### Database URL
+`.env` 파일을 수정합니다:
 ```
-DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/vital_monitor
-TEST_DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/vital_monitor_test
-```
-
-### JWT Secret Key
-Generate a secure random key:
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(32))"
+DATABASE_URL=postgresql+asyncpg://postgres:yourpassword@localhost:5432/vital_monitor
+TEST_DATABASE_URL=postgresql+asyncpg://postgres:yourpassword@localhost:5432/vital_monitor_test
+BEARER_TOKEN=my-secret-token-123
 ```
 
-### AES-256 Secret Key (32 bytes)
-Generate a 32-byte key for AES-256 encryption:
-```python
-import os
-import base64
+### 3. 의존성 설치
 
-# Generate 32 random bytes
-key = os.urandom(32)
-
-# Encode to base64 for storage in .env
-encoded_key = base64.b64encode(key).decode('utf-8')
-print(encoded_key)
-```
-
-Or use one-liner:
-```bash
-python -c "import os, base64; print(base64.b64encode(os.urandom(32)).decode())"
-```
-
-## Install Dependencies
 ```bash
 uv sync --all-extras
 ```
 
-## Run Pre-commit Hooks Setup
+### 4. 데이터베이스 마이그레이션
+
+```bash
+uv run alembic upgrade head
+```
+
+### 5. 서버 실행
+
+```bash
+uv run uvicorn src.app.main:app --reload
+```
+
+서버가 시작되면 http://localhost:8000/docs 에서 Swagger UI에 접속할 수 있습니다.
+
+### 6. 테스트 실행
+
+```bash
+uv run pytest
+```
+
+### (Optional) Pre-commit Hooks 설정
+
 ```bash
 uv run pre-commit install
 uv run pre-commit install --hook-type pre-push
