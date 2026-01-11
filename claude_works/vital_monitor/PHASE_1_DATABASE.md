@@ -126,18 +126,18 @@ uv run alembic upgrade head
 
 ## Checklist
 
-- [ ] config.py created with Settings class
-- [ ] database.py created with async engine
-- [ ] Base model with TimestampMixin created
-- [ ] DoctorModel with properties created
-- [ ] PatientModel created
-- [ ] VitalModel created
-- [ ] Domain entities created
-- [ ] Domain enums created
-- [ ] Domain exceptions created
-- [ ] Alembic initialized
-- [ ] Initial migration created and applied
-- [ ] Repository interfaces created
+- [x] config.py created with Settings class
+- [x] database.py created with async engine
+- [x] Base model with TimestampMixin created
+- [x] DoctorModel with properties created
+- [x] PatientModel created
+- [x] VitalModel created
+- [x] Domain entities created
+- [x] Domain enums created
+- [x] Domain exceptions created
+- [x] Alembic initialized
+- [x] Initial migration created and applied
+- [x] Repository interfaces created
 
 ## Test Cases
 
