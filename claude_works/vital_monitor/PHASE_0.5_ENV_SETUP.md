@@ -30,6 +30,10 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=6.0.0",
     "httpx>=0.28.0",
+    "ruff>=0.8.0",
+    "ty>=0.0.1a0",
+    "pre-commit>=4.0.0",
+    "ipython>=8.0.0",
 ]
 ```
 
@@ -53,10 +57,60 @@ AES_SECRET_KEY=your-32-byte-aes-secret-key-here
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-addopts = "-v --cov=src/app --cov-report=term-missing"
+addopts = "-v --cov=src/app --cov-report=term-missing --cov-fail-under=75"
 ```
 
-### 4. Create basic project structure
+### 4. Add ruff configuration to pyproject.toml
+
+```toml
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+```
+
+### 5. Add ty configuration to pyproject.toml
+
+```toml
+[tool.ty]
+python-version = "3.13"
+```
+
+### 6. Create .pre-commit-config.yaml
+
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-lint
+        name: ruff lint
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+        stages: [pre-commit]
+
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+        stages: [pre-commit]
+
+      - id: pytest
+        name: pytest
+        entry: uv run pytest
+        language: system
+        types: [python]
+        stages: [pre-push]
+        pass_filenames: false
+```
+
+### 7. Create basic project structure
 
 Create empty `__init__.py` files:
 - `src/__init__.py`
@@ -67,20 +121,43 @@ Create empty `__init__.py` files:
 - `src/app/presentation/__init__.py`
 - `tests/__init__.py`
 
-### 5. Run uv sync
+### 8. Run uv sync
 
 ```bash
 uv sync
 uv sync --dev
 ```
 
+### 9. Install pre-commit hooks
+
+```bash
+uv run pre-commit install
+uv run pre-commit install --hook-type pre-push
+```
+
+### 10. Update README.md
+
+Add "How to use" section with:
+- Instructions to copy `.env.example` to `.env`
+- Database URL configuration guide
+- JWT secret key generation example (`secrets.token_urlsafe(32)`)
+- AES-256 secret key generation example (`os.urandom(32)` + base64 encode)
+- Dependency installation command (`uv sync --all-extras`)
+- Pre-commit hooks setup commands
+
 ## Checklist
 
-- [ ] pyproject.toml updated with all dependencies
-- [ ] .env.example created
-- [ ] pytest configuration added
-- [ ] Basic directory structure created
-- [ ] uv sync successful
+- [x] pyproject.toml updated with all dependencies
+- [x] .env.example created
+- [x] pytest configuration added
+- [x] ruff configuration added
+- [x] ty configuration added
+- [x] .pre-commit-config.yaml created
+- [x] Basic directory structure created
+- [x] uv sync successful
+- [x] pre-commit hooks installed
+- [x] coverage threshold (75%) configured
+- [x] README.md updated with setup instructions
 
 ## Test Setup
 

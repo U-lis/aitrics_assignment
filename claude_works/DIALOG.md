@@ -188,3 +188,96 @@ tests/
 | **Total** | **73** | |
 
 **Status:** Test cases finalized, phase md files being updated
+
+---
+
+---
+
+## Session 3 - 2026-01-11
+
+### Phase 0.5 Additional Requirements
+
+**User Request:**
+Add linter, formatter, type checker, and pre-commit hooks to Phase 0.5.
+
+**Tool Decisions:**
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| ruff | Linter + Formatter | Single tool for both |
+| ty | Type Checker | Astral's new type checker |
+| pre-commit | Git hooks | Automate quality checks |
+
+**Pre-commit Hook Configuration:**
+| Hook Stage | Action |
+|------------|--------|
+| pre-commit | ruff lint + format |
+| pre-push | pytest (all tests must pass) |
+
+**Status:** Phase 0.5 md file to be updated with these requirements
+
+---
+
+---
+
+## Session 4 - 2026-01-11
+
+### Phase 5: CI Pipeline Addition
+
+**User Request:**
+Add Phase 5 for GitHub Actions CI pipeline to validate code quality on push/PR.
+
+**CI Tools:**
+| Tool | Purpose |
+|------|---------|
+| ruff | Linting + Formatting check |
+| ty | Type checking (Astral's Python type checker) |
+| pytest | Test execution with PostgreSQL |
+
+**User Decisions:**
+| Option | Choice |
+|--------|--------|
+| Type checker | ty (alpha, but recommended for Astral ecosystem consistency) |
+| Trigger branches | All branches (push and PR) |
+| Coverage reporting | Codecov integration included |
+
+**Workflow Structure:**
+- 3 parallel jobs: `lint`, `typecheck`, `test`
+- PostgreSQL service container for test job
+- UV caching via `astral-sh/setup-uv@v5`
+
+**Status:** Phase 5 md file and GLOBAL.md to be created/updated
+
+---
+
+---
+
+## Session 5 - 2026-01-11
+
+### Phase 0.5 Execution & Additional Requirements
+
+**Work Completed:**
+- Phase 0.5 environment setup executed successfully
+- All dependencies installed via `uv sync --all-extras`
+- Pre-commit hooks installed (pre-commit: ruff, pre-push: pytest)
+- ruff, ty verified working correctly
+
+**Additional Requirements During Execution:**
+| Requirement | Action Taken |
+|-------------|--------------|
+| Coverage >= 75% | Added `--cov-fail-under=75` to pytest config |
+| README .env setup guide | Added "How to use" section with key generation examples |
+| ipython for dev | Added to dev dependencies |
+
+**Key Generation Examples Added to README:**
+```bash
+# JWT secret
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# AES-256 key (32 bytes, base64 encoded)
+python -c "import os, base64; print(base64.b64encode(os.urandom(32)).decode())"
+```
+
+**User Action Required:**
+- Copy `.env.example` to `.env` and configure actual values
+
+**Status:** Phase 0.5 completed, ready for Phase 1

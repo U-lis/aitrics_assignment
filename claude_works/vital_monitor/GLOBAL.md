@@ -70,7 +70,7 @@ src/app/
 
 | Phase | Name | Dependencies | Status |
 |-------|------|--------------|--------|
-| 0.5 | Environment Setup | - | Pending |
+| 0.5 | Environment Setup | - | **Completed** |
 | 1 | Database Foundation | 0.5 | Pending |
 | 2 | Authentication | 1 | Pending |
 | 3A | Patient API | 2 | Pending |

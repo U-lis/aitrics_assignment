@@ -79,3 +79,54 @@ aitrics 비대면 과제.
         - exp 가 과거임
   
 # How to use
+
+## Environment Setup
+
+1. Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` and set your values:
+
+### Database URL
+```
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/vital_monitor
+TEST_DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/vital_monitor_test
+```
+
+### JWT Secret Key
+Generate a secure random key:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+### AES-256 Secret Key (32 bytes)
+Generate a 32-byte key for AES-256 encryption:
+```python
+import os
+import base64
+
+# Generate 32 random bytes
+key = os.urandom(32)
+
+# Encode to base64 for storage in .env
+encoded_key = base64.b64encode(key).decode('utf-8')
+print(encoded_key)
+```
+
+Or use one-liner:
+```bash
+python -c "import os, base64; print(base64.b64encode(os.urandom(32)).decode())"
+```
+
+## Install Dependencies
+```bash
+uv sync --all-extras
+```
+
+## Run Pre-commit Hooks Setup
+```bash
+uv run pre-commit install
+uv run pre-commit install --hook-type pre-push
+```
