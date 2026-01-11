@@ -99,8 +99,8 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/vital_monitor_test
-      JWT_SECRET_KEY: test-jwt-secret-key-for-ci
-      AES_SECRET_KEY: test-aes-32-byte-secret-key!!
+      TEST_DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/vital_monitor_test
+      BEARER_TOKEN: test-bearer-token-for-ci
     steps:
       - uses: actions/checkout@v4
 
@@ -189,4 +189,4 @@ uv run pytest --cov=src
 - All 3 jobs run in parallel for faster CI feedback
 - PostgreSQL service container is used for integration tests
 - Codecov upload has `continue-on-error: true` to prevent CI failure if upload fails
-- AES_SECRET_KEY must be exactly 32 bytes for AES-256
+- BEARER_TOKEN is used for server-to-server authentication

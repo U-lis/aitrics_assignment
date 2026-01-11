@@ -54,8 +54,8 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/vital_monitor_test
-      JWT_SECRET_KEY: test-jwt-secret-key-for-ci
-      AES_SECRET_KEY: test-aes-32-byte-secret-key!!
+      TEST_DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/vital_monitor_test
+      BEARER_TOKEN: test-bearer-token-for-ci
     steps:
       - uses: actions/checkout@v4
 

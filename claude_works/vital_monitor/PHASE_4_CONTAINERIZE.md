@@ -7,7 +7,7 @@ Docker setup with auto-migration and external access.
 ## Requirements
 
 1. Auto-run `alembic upgrade head` on service startup
-2. External access via `localhost:8080`
+2. External access via `localhost:9090`
 
 ## Tasks
 
@@ -85,11 +85,10 @@ services:
   api:
     build: .
     ports:
-      - "8080:8000"  # External access via localhost:8080
+      - "9090:8000"  # External access via localhost:9090
     environment:
       - DATABASE_URL=postgresql+asyncpg://aitrics:aitrics@db:5432/vital_monitor
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - AES_SECRET_KEY=${AES_SECRET_KEY}
+      - BEARER_TOKEN=${BEARER_TOKEN}
     depends_on:
       db:
         condition: service_healthy
@@ -134,9 +133,8 @@ Add sections:
 Ensure all required variables are documented:
 ```
 DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/vital_monitor
-JWT_SECRET_KEY=your-jwt-secret-key-here
-JWT_ALGORITHM=HS256
-AES_SECRET_KEY=your-32-byte-aes-secret-key-here
+TEST_DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/vital_monitor_test
+BEARER_TOKEN=your-secure-bearer-token-here
 ```
 
 ## Usage
@@ -146,8 +144,8 @@ AES_SECRET_KEY=your-32-byte-aes-secret-key-here
 docker-compose up --build
 
 # Access API
-# Swagger UI: http://localhost:8080/docs
-# OpenAPI JSON: http://localhost:8080/openapi.json
+# Swagger UI: http://localhost:9090/docs
+# OpenAPI JSON: http://localhost:9090/openapi.json
 
 # Stop services
 docker-compose down
@@ -158,16 +156,16 @@ docker-compose down -v
 
 ## Checklist
 
-- [ ] Dockerfile created
-- [ ] entrypoint.sh created with alembic migration
-- [ ] docker-compose.yml created
-- [ ] .dockerignore created
-- [ ] README.md updated
-- [ ] .env.example finalized
+- [x] Dockerfile created
+- [x] entrypoint.sh created with alembic migration
+- [x] docker-compose.yml created
+- [x] .dockerignore created
+- [x] README.md updated
+- [x] .env.example finalized
 - [ ] Container builds successfully
 - [ ] Migrations run automatically on startup
-- [ ] API accessible at localhost:8080
-- [ ] Swagger UI accessible at localhost:8080/docs
+- [ ] API accessible at localhost:9090
+- [ ] Swagger UI accessible at localhost:9090/docs
 
 ## Testing
 
@@ -177,6 +175,6 @@ docker-compose down -v
 
 - [ ] `docker-compose build` succeeds
 - [ ] Container logs show "Running database migrations..."
-- [ ] `curl http://localhost:8080/docs` returns HTML
+- [ ] `curl http://localhost:9090/docs` returns HTML
 - [ ] Swagger UI renders correctly
-- [ ] Can register/login/use API through Swagger
+- [ ] Can use API through Swagger (authenticate with Bearer token)
