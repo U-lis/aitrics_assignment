@@ -68,6 +68,7 @@ src/app/
 | 3A | Patient API | 2.5 | **Completed** |
 | 3B | Vital Data API | 2.5 | **Completed** |
 | 3C | Inference API | 2.5 | **Completed** |
+| 3.5 | OpenAPI Documentation | 3A, 3B, 3C | **Completed** |
 | 4 | Containerization | All | Pending |
 | 5 | CI Pipeline | 0.5 | Pending |
 

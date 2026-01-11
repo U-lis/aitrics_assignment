@@ -962,3 +962,134 @@ How to structure for future v2 API? Concerns about file separation vs confusion.
 Added "Future: API Version Management" section with Option A and B details.
 
 **Status:** Phase 3 post-merge refactoring completed
+
+---
+
+# Phase 3.5: OpenAPI Documentation
+
+## session_3.5_1
+
+**Date: 2026-01-11**
+
+### Task Request
+
+User requested OpenAPI documentation update for Phase 3ABC APIs:
+1. API purpose/description
+2. Request/Response types with examples
+3. All possible exceptions and error responses
+
+**Goal:** Frontend developer with no API knowledge should be able to integrate using only OpenAPI docs (Swagger/ReDoc).
+
+### Codebase Analysis
+
+**Current State:**
+| Component | Status |
+|-----------|--------|
+| FastAPI app metadata | Basic (title, description, version only) |
+| OpenAPI tags | Not defined |
+| Endpoint docstrings | None |
+| Schema Field descriptions | None |
+| Response examples | None |
+| Error response documentation | Not in OpenAPI |
+
+**APIs to Document:**
+| Phase | Endpoint | Method |
+|-------|----------|--------|
+| 3A | `/api/v1/patients` | POST |
+| 3A | `/api/v1/patients/{patient_id}` | PUT |
+| 3B | `/api/v1/vitals` | POST |
+| 3B | `/api/v1/vitals/patient/{patient_id}` | GET |
+| 3B | `/api/v1/vitals/{vital_id}` | PUT |
+| 3C | `/api/v1/inference/vital-risk` | POST |
+
+**Error Responses to Document:**
+| Status | Exception | Endpoints |
+|--------|-----------|-----------|
+| 401 | Bearer token invalid | All |
+| 404 | PatientNotFoundError | PUT /patients, POST /vitals |
+| 404 | VitalNotFoundError | PUT /vitals |
+| 409 | DuplicatePatientIdError | POST /patients |
+| 409 | OptimisticLockError | PUT /patients, PUT /vitals |
+| 422 | Validation Error | POST /inference (empty records) |
+
+### Implementation
+
+**Files Created:**
+| File | Description |
+|------|-------------|
+| `src/app/presentation/schemas/error_schema.py` | Shared ErrorResponse model |
+
+**Files Modified:**
+| File | Changes |
+|------|---------|
+| `src/app/main.py` | Added `openapi_tags` with descriptions for patients, vitals, inference |
+| `src/app/presentation/schemas/patient_schema.py` | Added Field descriptions, examples, model_config examples |
+| `src/app/presentation/schemas/vital_schema.py` | Added Field descriptions, examples, model_config examples |
+| `src/app/presentation/schemas/inference_schema.py` | Added Field descriptions, examples, model_config examples |
+| `src/app/presentation/patient_router.py` | Added summary, description, responses (401, 404, 409) |
+| `src/app/presentation/vital_router.py` | Added summary, description, Path/Query params, responses |
+| `src/app/presentation/inference_router.py` | Added summary, description with risk rules, responses |
+
+### Documentation Patterns Used
+
+**Pydantic Field:**
+```python
+patient_id: str = Field(
+    ...,
+    description="Hospital patient identifier",
+    examples=["P00001234"],
+)
+```
+
+**Router Endpoint:**
+```python
+@router.post(
+    "",
+    response_model=PatientResponse,
+    status_code=201,
+    summary="Register a new patient",
+    description="Creates a new patient record.",
+    responses={
+        401: {"model": ErrorResponse, "description": "Invalid Bearer token"},
+        409: {"model": ErrorResponse, "description": "Patient ID exists"},
+    },
+)
+```
+
+**Path/Query Parameters:**
+```python
+patient_id: str = Path(..., description="Hospital patient identifier")
+from_: datetime = Query(..., alias="from", description="Start of time range")
+```
+
+### OpenAPI Verification
+
+**Schema Check Results:**
+```
+Title: Vital Monitor API
+Version: 0.1.0
+
+Tags:
+  - patients: Patient registration and management...
+  - vitals: Vital signs data recording...
+  - inference: Rule-based risk assessment...
+
+Security Schemes: ['HTTPBearer']
+
+Endpoints with documentation:
+  POST /api/v1/patients - Responses: [201, 401, 409, 422]
+  PUT /api/v1/patients/{patient_id} - Responses: [200, 401, 404, 409, 422]
+  POST /api/v1/vitals - Responses: [201, 401, 404, 422]
+  GET /api/v1/vitals/patient/{patient_id} - Responses: [200, 401, 422]
+  PUT /api/v1/vitals/{vital_id} - Responses: [200, 401, 404, 409, 422]
+  POST /api/v1/inference/vital-risk - Responses: [200, 401, 422]
+```
+
+### Test Results
+
+```
+61 passed
+Coverage: 86.43%
+```
+
+**Status:** Phase 3.5 completed

@@ -11,10 +11,26 @@ from app.presentation.inference_router import router as inference_router
 from app.presentation.patient_router import router as patient_router
 from app.presentation.vital_router import router as vital_router
 
+openapi_tags = [
+    {
+        "name": "patients",
+        "description": "Patient registration and management. Supports optimistic locking for updates.",
+    },
+    {
+        "name": "vitals",
+        "description": "Vital signs data recording, retrieval, and correction. Supports optimistic locking.",
+    },
+    {
+        "name": "inference",
+        "description": "Rule-based risk assessment using vital signs data.",
+    },
+]
+
 app = FastAPI(
     title="Vital Monitor API",
     description="Hospital Vital Signs Monitoring REST API",
     version="0.1.0",
+    openapi_tags=openapi_tags,
 )
 
 # Routers
