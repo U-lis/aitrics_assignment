@@ -5,6 +5,12 @@ from uuid import UUID
 
 @dataclass
 class Patient:
+    """Domain entity representing a hospital patient.
+
+    This is the core domain object independent of infrastructure concerns.
+    Use this for business logic validation and domain events.
+    """
+
     patient_id: str
     name: str
     gender: str

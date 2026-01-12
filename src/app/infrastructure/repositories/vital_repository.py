@@ -18,10 +18,10 @@ class VitalRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def find_by_patient_id(self, patient_id: str) -> list[VitalModel]:
-        stmt = select(VitalModel).where(VitalModel.patient_id == patient_id)
-        result = await self.session.execute(stmt)
-        return list(result.scalars().all())
+    # async def find_by_patient_id(self, patient_id: str) -> list[VitalModel]:
+    #     stmt = select(VitalModel).where(VitalModel.patient_id == patient_id)
+    #     result = await self.session.execute(stmt)
+    #     return list(result.scalars().all())
 
     async def find_by_time_range(
         self,
@@ -68,10 +68,10 @@ class VitalRepository:
             raise OptimisticLockError(f"Version mismatch for vital {vital_id}")
         return updated
 
-    async def delete(self, vital_id: UUID) -> bool:
-        vital = await self.find_by_id(vital_id)
-        if vital is None:
-            return False
-        await self.session.delete(vital)
-        await self.session.flush()
-        return True
+    # async def delete(self, vital_id: UUID) -> bool:
+    #     vital = await self.find_by_id(vital_id)
+    #     if vital is None:
+    #         return False
+    #     await self.session.delete(vital)
+    #     await self.session.flush()
+    #     return True

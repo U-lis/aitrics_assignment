@@ -8,6 +8,12 @@ from app.domain.vital_type import VitalType
 
 @dataclass
 class Vital:
+    """Domain entity representing a vital sign measurement.
+
+    This is the core domain object independent of infrastructure concerns.
+    Use this for business logic validation and domain events.
+    """
+
     patient_id: str
     recorded_at: datetime
     vital_type: VitalType

@@ -315,3 +315,129 @@ v1_router.include_router(inference_router)
 
 **Pros:** Minimal file changes, routers can be reused across versions
 **Cons:** Less clear separation between versions
+
+## 3. Domain Entity Strategy
+
+### Current Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Presentation   │     │   Application   │     │ Infrastructure  │
+│  (Router)       │────▶│   (Service)     │────▶│  (Repository)   │
+│                 │     │                 │     │                 │
+│  Schema ────────│────▶│                 │────▶│  SQLAlchemy     │
+│  (Pydantic)     │     │                 │     │  Model          │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                        ┌─────────────────┐             │
+                        │     Domain      │◀────────────┘
+                        │   (Entity)      │  (currently not used
+                        │                 │   for data transfer)
+                        │  Patient, Vital │
+                        └─────────────────┘
+```
+
+### Design Decision: Pragmatic Approach
+
+This project uses SQLAlchemy models directly across layers for simplicity:
+
+| Layer      | Current                   | Clean Architecture (Ideal)                      |
+|------------|---------------------------|-------------------------------------------------|
+| Router     | Returns `PatientModel`    | Returns `PatientResponse` from `Patient` entity |
+| Service    | Works with `PatientModel` | Works with `Patient` entity                     |
+| Repository | Returns `PatientModel`    | Converts `PatientModel` → `Patient` entity      |
+
+**Rationale:**
+
+- Simple CRUD operations with no complex business logic
+- Reduced boilerplate (no Model ↔ Entity conversion)
+- Faster development for MVP
+
+### When to Introduce Domain Entities
+
+Domain entities (`Patient`, `Vital`) should be actively used when:
+
+1. **Business Logic Complexity Increases**
+   ```python
+   # Example: Patient entity with business rules
+   @dataclass
+   class Patient:
+       ...
+       def is_adult(self) -> bool:
+           return (date.today() - self.birth_date).days >= 18 * 365
+
+       def can_receive_treatment(self, treatment: Treatment) -> bool:
+           # Complex eligibility rules
+           ...
+   ```
+
+2. **Domain Events Are Needed**
+   ```python
+   @dataclass
+   class Patient:
+       ...
+       events: list[DomainEvent] = field(default_factory=list)
+
+       def admit(self):
+           self.status = "admitted"
+           self.events.append(PatientAdmittedEvent(self.patient_id))
+   ```
+
+3. **Multiple Persistence Mechanisms**
+    - When data comes from multiple sources (DB, external API, cache)
+    - Domain entity provides unified interface
+
+4. **Testing Business Logic in Isolation**
+    - Domain entities can be unit tested without DB
+    - Pure Python objects with no infrastructure dependencies
+
+### Migration Path
+
+When complexity demands proper domain entities:
+
+```python
+# Step 1: Add conversion methods to Repository
+class PatientRepository:
+    async def find_by_patient_id(self, patient_id: str) -> Patient | None:
+        model = await self._find_model_by_patient_id(patient_id)
+        return self._to_entity(model) if model else None
+
+    def _to_entity(self, model: PatientModel) -> Patient:
+        return Patient(
+            id=model.id,
+            patient_id=model.patient_id,
+            name=model.name,
+            gender=model.gender,
+            birth_date=model.birth_date,
+            version=model.version,
+            created_at=model.created_at,
+            updated_at=model.updated_at,
+        )
+
+
+# Step 2: Update Service to use Domain Entity
+class PatientService:
+    async def get_patient(self, patient_id: str) -> Patient:
+        patient = await self.repository.find_by_patient_id(patient_id)
+        if patient is None:
+            raise PatientNotFoundError(...)
+        return patient  # Returns domain entity, not model
+
+
+# Step 3: Router converts Entity → Response Schema
+@router.get("/{patient_id}")
+async def get_patient(...) -> PatientResponse:
+    patient = await service.get_patient(patient_id)
+    return PatientResponse.model_validate(patient.__dict__)
+```
+
+### Current Domain Files
+
+Domain entities are defined but reserved for future use:
+
+- `src/app/domain/patient.py` - Patient entity
+- `src/app/domain/vital.py` - Vital entity
+- `src/app/domain/exceptions.py` - Domain exceptions (actively used)
+- `src/app/domain/vital_type.py` - Value object (actively used)
+- `src/app/domain/risk_level.py` - Value object (actively used)
+- `src/app/domain/inference/` - Inference strategy pattern (actively used)

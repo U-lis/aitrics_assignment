@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,10 +9,10 @@ class PatientRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def find_by_id(self, id: UUID) -> PatientModel | None:
-        stmt = select(PatientModel).where(PatientModel.id == id)
-        result = await self.session.execute(stmt)
-        return result.scalar_one_or_none()
+    # async def find_by_id(self, id: UUID) -> PatientModel | None:
+    #     stmt = select(PatientModel).where(PatientModel.id == id)
+    #     result = await self.session.execute(stmt)
+    #     return result.scalar_one_or_none()
 
     async def find_by_patient_id(self, patient_id: str) -> PatientModel | None:
         stmt = select(PatientModel).where(PatientModel.patient_id == patient_id)
@@ -52,10 +50,10 @@ class PatientRepository:
             raise OptimisticLockError(f"Version mismatch for patient {patient_id}")
         return updated
 
-    async def delete(self, patient_id: str) -> bool:
-        patient = await self.find_by_patient_id(patient_id)
-        if patient is None:
-            return False
-        await self.session.delete(patient)
-        await self.session.flush()
-        return True
+    # async def delete(self, patient_id: str) -> bool:
+    #     patient = await self.find_by_patient_id(patient_id)
+    #     if patient is None:
+    #         return False
+    #     await self.session.delete(patient)
+    #     await self.session.flush()
+    #     return True
