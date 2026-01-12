@@ -100,7 +100,7 @@ jobs:
     env:
       DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/vital_monitor_test
       TEST_DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/vital_monitor_test
-      BEARER_TOKEN: test-bearer-token-for-ci
+      BEARER_TOKEN: test-bearer-token
     steps:
       - uses: actions/checkout@v4
 
